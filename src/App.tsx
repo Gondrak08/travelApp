@@ -9,8 +9,7 @@ export type DestinatioinType = {
   cityDestination:string;
   destinationLocation:string;
   cityIntermediate:{
-    city:string;
-    location:string
+    city:string
   };
   date:Date;
   passengersNumber:string;

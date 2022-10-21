@@ -16,10 +16,13 @@ type IProps = {
 }
 
 
+
 const Search = ({userDest, setUserDest}:IProps) =>{
-    console.log({userDest})
+    console.log(userDest)
     const [arr, arrSet] = useState<number[]>([]);
     const [cities, citiesSet] =  useState([] as any)
+    const [interCities, interCitiesSet] = useState<any>([]);
+    
     const [startDate, setStartDate] = useState(new Date());
 
     const [error, setError] = useState<boolean>(false);
@@ -47,9 +50,9 @@ const Search = ({userDest, setUserDest}:IProps) =>{
         citiesSet(Data);
     },[])
 
-    // handling errors
     useEffect(()=>{
         if(Object.keys(userDest).length > 0){
+            // intermediateCities undone
             // if(userDest.cityIntermediate && userDest.cityOrigin && userDest.cityIntermediate.includes(userDest.cityOrigin)||
             // userDest.cityIntermediate && userDest.cityDestination && userDest.cityIntermediate.includes( userDest.cityDestination)
             // ){
@@ -70,13 +73,19 @@ const Search = ({userDest, setUserDest}:IProps) =>{
         }
     },[userDest])
 
-    // useEffect(()=>{
-    //     if(isReady){
-    //         setTimeout(()=>{
-    //             navigate('/results')
-    //         }, 10000)
-    //     };
-    // },[isReady])
+    if(userDest.cityIntermediate){
+
+        if(userDest.cityIntermediate instanceof Array){
+            if(userDest.cityIntermediate.length > 0){
+                userDest.cityIntermediate.map((value, key)=>{
+                    // console.log(value)
+                })
+                // console.log(userDest.cityIntermediate)
+            }
+        }
+      
+    }
+   
 
 
     if(userDest){
@@ -113,29 +122,39 @@ const Search = ({userDest, setUserDest}:IProps) =>{
         // select values
         if(e.target.id === 'cityIntermediate'){
             if(userDest.cityIntermediate){
-                let oldValue={
-                    ...userDest.cityIntermediate 
+                if(userDest.cityIntermediate instanceof Array){
+
+                    userDest.cityIntermediate.map((value:any, key:number)=>{
+                        interCitiesSet((state:any)=>{
+                            return[...value]
+                        });
+                    })
                 }
-
-
+           
+                let oldValue = interCities;
+                console.log(oldValue);
                 let newVal:{city:string}[] =[];
                 newVal.push(oldValue);
                 newVal[newVal.length] = {'city':e.target.value}
+                
+           
 
-            
                 setUserDest(state=>{
                     return { 
                         ...state,[ e.target.id]:[newVal]}
                     }
                 )
-
                 
             } else {
+
                 setUserDest(state=>{
                     return { 
-                        ...state, [e.target.id]:{
-                        ...state['cityIntermediate'], ['city']:e.target.value   
-                    }}
+                        ...state, [e.target.id]:[
+                            {
+                                ...state['cityIntermediate'], ['city']:e.target.value
+                            }
+                        ]
+                }
                 })
             }
         }else 
@@ -309,6 +328,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                                     const newVal = arr.filter((i, k)=>{
                                                         if(item !== i) return i
                                                     });
+                                                    arrSet(newVal);
                                                 
                                                 }}/>
                                                 <select id="cityIntermediate" key={item} className={`${error&&errorType==='interCity'?'border-[1px] border-rose-500 ':''} w-full p-3`} onChange={(e)=>{handleDestination(e)}} >
