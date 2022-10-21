@@ -204,7 +204,8 @@ const Search = ({userDest, setUserDest}:IProps) =>{
             if(userDest.cityOrigin&&
                 userDest.cityDestination&&
                 userDest.date&&
-                userDest.passengersNumber
+                userDest.passengersNumber&&
+                userDest.passengersNumber !== '0'
                 && !error
                 ){
                     CalculateForm(e)  
