@@ -16,24 +16,27 @@ type IProps = {
 }
 
 
+interface IntermedCity{
+    cityIntermediate?:[{
+        city?:string
+        location?:string
+      }]
+}
+
 
 const Search = ({userDest, setUserDest}:IProps) =>{
-    console.log(userDest)
+    console.log(userDest);
+
     const [arr, arrSet] = useState<number[]>([]);
     const [cities, citiesSet] =  useState([] as any)
-    const [interCities, interCitiesSet] = useState<any>([]);
-    
-    const [startDate, setStartDate] = useState(new Date());
 
-    const [error, setError] = useState<boolean>(false);
-    const [errorType, errorTypeSet] = useState<string>('');
+    const [interCity, interCitySet] = useState<any>([])
+
+    // const [interCities, interCitiesSet] = useState<any>([]);
+
+
+
     const [interError, setInterError] = useState<boolean>(false);
-    const [isDistance,setIsDistance] = useState<boolean>(false);
-    const[isCalculating, setIsCalculataing] = useState<boolean>(false)
-    const [isReady, setIsReady] = useState<boolean>(false);
-    
-    const navigate = useNavigate();
-    
     const [toLocation, setToLocation] = useState<any>({
         latitude:'',
         longitude:''
@@ -43,11 +46,27 @@ const Search = ({userDest, setUserDest}:IProps) =>{
         latitude:'',
         longitude:''
     });
+    
+    const [startDate, setStartDate] = useState(new Date());
 
+    const [error, setError] = useState<boolean>(false);
+    const [errorType, errorTypeSet] = useState<string>('');
+    
+    
+    const [isDistance,setIsDistance] = useState<boolean>(false);
+    const [isCalculating, setIsCalculataing] = useState<boolean>(false)
+    const [isReady, setIsReady] = useState<boolean>(false);
+    
+    const navigate = useNavigate();
     
 
     useEffect(()=>{
         citiesSet(Data);
+        if(userDest.cityIntermediate){
+            if(userDest.cityIntermediate instanceof Array){
+                interCitySet(userDest.cityIntermediate)
+            }
+        }
     },[])
 
     useEffect(()=>{
@@ -57,7 +76,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
             // userDest.cityIntermediate && userDest.cityDestination && userDest.cityIntermediate.includes( userDest.cityDestination)
             // ){
             //     setError(true);
-            //     errorTypeSet('interCity');
+            //     errorTypeSet('AdjasentCities');
             // }
             // else 
             
@@ -70,32 +89,66 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                 setError(false);
                 errorTypeSet('');
             }
+
+            
         }
     },[userDest])
 
-    if(userDest.cityIntermediate){
+    
 
-        if(userDest.cityIntermediate instanceof Array){
-            if(userDest.cityIntermediate.length > 0){
-                userDest.cityIntermediate.map((value, key)=>{
-                    // console.log(value)
-                })
-                // console.log(userDest.cityIntermediate)
-            }
-        }
-      
-    }
-   
-
-
-    if(userDest){
-        if(userDest.cityIntermediate){
-
-        }
-    }
-
+    console.log(interCity)
    
     function handleDestination(e:any){
+        // select values
+        if(e.target.id === 'cityIntermediate'){
+
+            // interCitySet((state:any)=>{
+            //     let arr = [...state]
+            //     arr[arr.length] = {'city':e.target.value}
+            //     return ([...arr])
+            // })
+
+            setUserDest(state=>{
+                // let old = [state['cityIntermediate']];
+                let arr:any = Object.assign([], state['cityIntermediate'])
+                arr[arr.length] = {'city':e.target.value};
+                
+                return { 
+                    ...state,[ e.target.id]:[...arr] }
+                }
+            )
+
+            // if(userDest.cityIntermediate ){
+            //         interCitySet((state:any)=>{
+            //             let arr = [...state]
+            //             arr[arr.length] = {'city':e.target.value}
+            //             return ([...arr])
+            //         })
+  
+            //         setUserDest(state=>{
+            //             return { 
+            //                 ...state,[ e.target.id]: [...interCity] }
+            //             }
+            //         )
+                
+
+            // } else {
+
+            //     setUserDest(state=>{
+            //         return { 
+            //             ...state, [e.target.id]:[
+            //                 {
+            //                     ...state['cityIntermediate'], ['city']:e.target.value
+            //                 }
+            //             ]
+            //     }
+            //     })
+            // }
+        }else 
+            setUserDest(state=>{
+                return {...state,[e.target.id]: e.target.value}
+            })
+
         // calculating total Destination
         if(e.target.id === 'cityOrigin'||e.target.id === 'cityDestination'){
             const keyName = e.target.value;
@@ -119,49 +172,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
             }
             
         }
-        // select values
-        if(e.target.id === 'cityIntermediate'){
-            if(userDest.cityIntermediate){
-                if(userDest.cityIntermediate instanceof Array){
-
-                    userDest.cityIntermediate.map((value:any, key:number)=>{
-                        interCitiesSet((state:any)=>{
-                            return[...value]
-                        });
-                    })
-                }
-           
-                let oldValue = interCities;
-                console.log(oldValue);
-                let newVal:{city:string}[] =[];
-                newVal.push(oldValue);
-                newVal[newVal.length] = {'city':e.target.value}
-                
-           
-
-                setUserDest(state=>{
-                    return { 
-                        ...state,[ e.target.id]:[newVal]}
-                    }
-                )
-                
-            } else {
-
-                setUserDest(state=>{
-                    return { 
-                        ...state, [e.target.id]:[
-                            {
-                                ...state['cityIntermediate'], ['city']:e.target.value
-                            }
-                        ]
-                }
-                })
-            }
-        }else 
-            setUserDest(state=>{
-                return {...state,[e.target.id]: e.target.value}
-            })
-
+        
     }
 
     function CalculateForm(e:any){
