@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import DatePicker from "react-datepicker";
 import{DestinatioinType} from '../App'
 type DestinyProp = {
@@ -12,6 +12,9 @@ const Results =({state}:DestinyProp)=>{
     const [data, setData] = useState<any>()
     const [startDate, setStartDate] = useState(new Date());
     const navigate = useNavigate()
+
+    // const query = new URLSearchParams(useLocation().search())
+
     useEffect(()=>{
         if(Object.keys(state).length > 0){
             setData(state)
@@ -20,7 +23,7 @@ const Results =({state}:DestinyProp)=>{
             navigate("/")
         }
     },[])
-    // const newDate = new Date(data.date)
+
     if(data){
         console.log(data)
     }

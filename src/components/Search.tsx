@@ -113,22 +113,19 @@ const Search = ({userDest, setUserDest}:IProps) =>{
         // select values
         if(e.target.id === 'cityIntermediate'){
             if(userDest.cityIntermediate){
-                let oldValue=[{
+                let oldValue={
                     ...userDest.cityIntermediate 
+                }
 
-                }]
 
-               
+                let newVal:{city:string}[] =[];
+                newVal.push(oldValue);
+                newVal[newVal.length] = {'city':e.target.value}
 
-                // const newVal= e.target.value;
-                // JSON.stringify(newVal)
-
-                // console.log(typeof oldValue)
+            
                 setUserDest(state=>{
                     return { 
-                        ...state,[ e.target.id]:[{
-                        ...state['cityIntermediate'],['city']: e.target.value
-                        }]}
+                        ...state,[ e.target.id]:[newVal]}
                     }
                 )
 
@@ -136,9 +133,9 @@ const Search = ({userDest, setUserDest}:IProps) =>{
             } else {
                 setUserDest(state=>{
                     return { 
-                        ...state, [e.target.id]:[{
+                        ...state, [e.target.id]:{
                         ...state['cityIntermediate'], ['city']:e.target.value   
-                    }]}
+                    }}
                 })
             }
         }else 
