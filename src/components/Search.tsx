@@ -8,6 +8,7 @@ import{DestinatioinType} from '../App'
 
 import haversine from 'haversine-distance'
 
+import ClipLoader from "react-spinners/ClipLoader";
 
 type IProps = {
     userDest:Partial<DestinatioinType>
@@ -49,12 +50,15 @@ const Search = ({userDest, setUserDest}:IProps) =>{
     // handling errors
     useEffect(()=>{
         if(Object.keys(userDest).length > 0){
-            if(userDest.cityIntermediate && userDest.cityOrigin && userDest.cityIntermediate.includes(userDest.cityOrigin)||
-            userDest.cityIntermediate && userDest.cityDestination && userDest.cityIntermediate.includes( userDest.cityDestination)
-            ){
-                setError(true);
-                errorTypeSet('interCity');
-            }else if(userDest.cityOrigin && userDest.cityDestination &&
+            // if(userDest.cityIntermediate && userDest.cityOrigin && userDest.cityIntermediate.includes(userDest.cityOrigin)||
+            // userDest.cityIntermediate && userDest.cityDestination && userDest.cityIntermediate.includes( userDest.cityDestination)
+            // ){
+            //     setError(true);
+            //     errorTypeSet('interCity');
+            // }
+            // else 
+            
+            if(userDest.cityOrigin && userDest.cityDestination &&
                 userDest.cityOrigin == userDest.cityDestination){
                 setError(true);
                 errorTypeSet('similarCity');
@@ -66,16 +70,24 @@ const Search = ({userDest, setUserDest}:IProps) =>{
         }
     },[userDest])
 
-    useEffect(()=>{
-        if(isReady){
-            setTimeout(()=>{
-                navigate('/results')
-            }, 1000)
-        };
-    },[isReady])
+    // useEffect(()=>{
+    //     if(isReady){
+    //         setTimeout(()=>{
+    //             navigate('/results')
+    //         }, 10000)
+    //     };
+    // },[isReady])
+
+
+    if(userDest){
+        if(userDest.cityIntermediate){
+
+        }
+    }
 
    
     function handleDestination(e:any){
+        // calculating total Destination
         if(e.target.id === 'cityOrigin'||e.target.id === 'cityDestination'){
             const keyName = e.target.value;
             const item = cities.filter((value:any,key:number)=>{
@@ -101,21 +113,28 @@ const Search = ({userDest, setUserDest}:IProps) =>{
         // select values
         if(e.target.id === 'cityIntermediate'){
             if(userDest.cityIntermediate){
-                const oldValue: string[] = [...userDest.cityIntermediate]
-                const newVal= e.target.value;
-                JSON.stringify(newVal)
-                if(oldValue.includes(newVal)){
-                    setInterError(true);
-                }else {
-                    setUserDest(state=>{
-                        return {...state,[e.target.id]:[...oldValue, e.target.value]}
-                    })
-                    setInterError(false);
-                }               
-                    
+                let oldValue=[
+                    userDest.cityIntermediate 
+                ];
+                // const newVal= e.target.value;
+                // JSON.stringify(newVal)
+
+                // console.log(typeof oldValue)
+                setUserDest(state=>{
+                    return { 
+                        ...state,[ e.target.id]:[{
+                        ...state['cityIntermediate'],['city']: e.target.value
+                        }]}
+                    }
+                )
+
+                
             } else {
                 setUserDest(state=>{
-                    return {...state,[e.target.id]:[ e.target.value]}
+                    return { 
+                        ...state, [e.target.id]:[{
+                        ...state['cityIntermediate'], ['city']:e.target.value   
+                    }]}
                 })
             }
         }else 
@@ -125,9 +144,25 @@ const Search = ({userDest, setUserDest}:IProps) =>{
 
     }
 
-
     function CalculateForm(e:any){
             e.preventDefault()
+
+            if(fromLocation){
+                const originLoc = haversine(fromLocation.latitude, fromLocation.longitude);
+                const Km = JSON.stringify(Math.round(originLoc/100)/10);
+                setUserDest(state=>{
+                    return {...state,['originLocation']: Km}
+                })
+            }
+
+            if(toLocation.latitude){
+                const destinLoc = haversine(toLocation.latitude, toLocation.longitude);
+                const Km = JSON.stringify(Math.round(destinLoc/100)/10);
+                setUserDest(state=>{
+                    return {...state,['destinationLocation']: Km}
+                })
+            }
+
             if(toLocation.latitude && fromLocation.latitude){
                 const total = haversine(fromLocation, toLocation)
                 const Km = JSON.stringify(Math.round(total/100)/10);
@@ -135,16 +170,14 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                 setIsCalculataing(true)
             }
             
-        }
+    }
     if(isCalculating){
         setTimeout(() => {
             setIsDistance(true);
             setIsCalculataing(false);
             setIsReady(true);
-        }, 10000);
+        }, 1900);
     }
-
-    
 
     function HandleSubmit(e:any){
         if(Object.keys(userDest).length > 0){
@@ -154,34 +187,55 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                 userDest.passengersNumber
                 && !error
                 ){
-                    CalculateForm(e)
-                    // setIsReady(true);
-                    
+                    CalculateForm(e)  
                 }else{
-                    if(!userDest.date){
+                    if(!userDest.cityOrigin){
+                        setError(true);
+                        errorTypeSet('cityOrigin');
+                    } 
+                    else if(!userDest.cityDestination){
+                        setError(true);
+                        errorTypeSet('cityDestination');
+                    }
+                    else if(userDest.cityDestination === userDest.cityOrigin){
+                        setError(true);
+                        errorTypeSet('similarCity');
+                    } 
+                    else if(!userDest.date){
                         setError(true)
                         errorTypeSet("date")
                     }else if(!userDest.passengersNumber||userDest.passengersNumber&&userDest.passengersNumber ==='0'){
                         setError(true)
                         errorTypeSet('numberError')
                     }
-                    else if(userDest.cityDestination === userDest.cityOrigin){
-                        setError(true);
-                        errorTypeSet('similarCity');
-                    }
                     else{
                         setError(true);
                         errorTypeSet("global");
-                        console.log('não funcionou')
-                        console.log(userDest)
                     }
                 }
+        } else{
+            setError(true);
+            errorTypeSet("global");
         }
+
+        if(isReady){
+            navigate('/results')
+        };
+
         e.preventDefault();
-    }  
+    }
+
+    
+
     return(
        <section className="w-full h-full flex items-center justify-center">
+            
            <form onSubmit={(e)=>{HandleSubmit(e)}} className="flex flex-col rounded-md p-3 gap-3 bg-white max-w-[30em] w-full h-[fit-content] "  >
+                <div className='w-full flex flex-col justify-center '>
+                    <h1 className='text-center text-[20px]' >Travel<span className='text-rose-500' >App</span></h1>
+                    <span className='text-center' >Welcome. Please feel free to chose your destination</span>
+                </div>
+
                 <div id="globalError">
                     {error&&errorType ==='global' ? (
                         <span className='text-red-500' > You must fill all the fields with '*' before to submit</span>
@@ -198,19 +252,25 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                         </div>
 
                         <div  className="w-full flex items-center justify-between gap-3" >
-                            <div>
+                            <div className='flex flex-col' >
                                 <label>From:*</label>
+                                {error&&errorType==='cityOrigin'?(
+                                     <span className='text-red-500 text-[8]'>Select a city of origin</span>
+                                ):null}
                                 <select id="cityOrigin" 
-                                className={`${error&&errorType==='similarCity'?'border-[1px] border-rose-500 ':''} w-full p-3`} onChange={(e)=>{handleDestination(e)}} >
+                                className={`${error&&errorType==='similarCity'||error&&errorType==='global'||error&&errorType==='cityOrigin'?'border-[1px] border-rose-500 ':''} w-full p-3`} onChange={(e)=>{handleDestination(e)}} >
                                     <option>City of origin</option>
                                     {cities && cities.map((item:[string], index:number)=>(
                                         <option key={index} >{item[0]}</option>
                                     ))}
                                 </select>
                             </div>
-                            <div>
+                            <div className='flex flex-col' >
                                 <label>To:*</label>
-                                <select id="cityDestination" className={`${error&&errorType==='similarCity'?'border-[1px] border-rose-500 ':''} w-full p-3`} onChange={(e)=>{handleDestination(e)}} >
+                                {error&&errorType==='cityDestination'?(
+                                     <span className='text-red-500 text-[8]'>Select a destination</span>
+                                ):null}
+                                <select id="cityDestination" className={`${error&&errorType==='similarCity' ||  error&&errorType==='global'||error&&errorType==='cityDestination' ?'border-[1px] border-rose-500 ':''} w-full p-3`} onChange={(e)=>{handleDestination(e)}} >
                                     <option>City of destination</option>
                                     {cities && cities.map((item:[string], index:number)=>(
                                         <option key={index} >{item[0]}</option>
@@ -253,7 +313,10 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                                 <select id="cityIntermediate" key={item} className={`${error&&errorType==='interCity'?'border-[1px] border-rose-500 ':''} w-full p-3`} onChange={(e)=>{handleDestination(e)}} >
                                                         <option>select a city</option>
                                                         {cities && cities.map((item:[string], index:number)=>(
+                                                            <>
+                                                            
                                                             <option key={index}>{item[0]}</option>
+                                                            </>
                                                         ))}
                                                 </select>
                                             </div>
@@ -267,7 +330,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                 </div>
 
                <div className='flex justify-between items-center'>
-                    <div className='w-full flex flex-col gap-2 '>
+                    <div id="dateContainer" className='w-full flex flex-col gap-2 '>
                         <span>Chose a date:*</span>
                         {
                             error&&errorType==='date'? (
@@ -284,7 +347,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                 setUserDest({...userDest, ['date']: date})  
                         }}/>
                     </div>
-                    <div className='w-full flex flex-col gap-2'>
+                    <div id="passengerContainer" className='w-full flex flex-col gap-2'>
                         <span>number of passengers:*</span>
                         {
                             error&&errorType==='numberError'? (
@@ -296,15 +359,35 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                </div>
 
                <div id="distance">
+              
+                {
+                    isCalculating?(
+                        <div className='w-full flex flex-col items-center'>
+                            <span>Calculating routes...</span>
+                            <ClipLoader
+                                color="blue"
+                                loading={isCalculating}
+                            
+                                size={100}
+                                aria-label="Loading Spinner"
+                                data-testid="loader"
+                            />
+                        </div>
+
+                    ):null
+                }
+
                 {isDistance?(
                     <div className='flex gap-2 ' >
-                        <label>Total distance to be traveld:</label>
-                        {
-                            userDest.totalDistance!=null ?(
-                                <span>{userDest.totalDistance} Km</span>
-                            ) : null
-                        }
-                       
+
+                        <div>
+                            <label>Total distance to be traveld:</label>
+                            {
+                                userDest.totalDistance!=null ?(
+                                    <span>{userDest.totalDistance} Km</span>
+                                ) : null
+                            }
+                        </div>
                     </div>
                 ):null}
                </div>
@@ -315,10 +398,10 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                         userDest.date&&
                         userDest.passengersNumber&&
                         userDest.passengersNumber !== '0'&& !isCalculating &&
-                        !error ? 'bg-blue-200 text-white': isCalculating ? 'bg-rose-500 text-white': 'bg-gray-300'} p-2 rounded-sm`}
+                        !error ? 'bg-blue-500 text-white': isCalculating ? 'bg-rose-500 text-white': 'bg-gray-300 cursor-not-allowed '} p-2 rounded-sm`}
                        
                         >
-                            {isCalculating? "Calculating route" : isReady? "Ready!" : "Calculate Route"}
+                            {isCalculating? "Calculating route..." : isReady? "Ready!" : "Calculate Route"}
                         </button>
                </div>
            </form>

@@ -5,8 +5,13 @@ import Results from './components/Results';
 
 export type DestinatioinType = {
   cityOrigin:string;
+  originLocation:string;
   cityDestination:string;
-  cityIntermediate:[string];
+  destinationLocation:string;
+  cityIntermediate:{
+    city:string;
+    location:string
+  };
   date:Date;
   passengersNumber:string;
   totalDistance:string
