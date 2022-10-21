@@ -113,9 +113,13 @@ const Search = ({userDest, setUserDest}:IProps) =>{
         // select values
         if(e.target.id === 'cityIntermediate'){
             if(userDest.cityIntermediate){
-                let oldValue=[
-                    userDest.cityIntermediate 
-                ];
+                let oldValue=[{
+                    ...userDest.cityIntermediate 
+
+                }]
+
+               
+
                 // const newVal= e.target.value;
                 // JSON.stringify(newVal)
 
@@ -251,8 +255,8 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                             null}
                         </div>
 
-                        <div  className="w-full flex items-center justify-between gap-3" >
-                            <div className='flex flex-col' >
+                        <div  className="w-full flex items-center justify-between gap-5 " >
+                            <div className='flex w-full flex-col' >
                                 <label>From:*</label>
                                 {error&&errorType==='cityOrigin'?(
                                      <span className='text-red-500 text-[8]'>Select a city of origin</span>
@@ -265,7 +269,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                     ))}
                                 </select>
                             </div>
-                            <div className='flex flex-col' >
+                            <div className='flex w-full flex-col' >
                                 <label>To:*</label>
                                 {error&&errorType==='cityDestination'?(
                                      <span className='text-red-500 text-[8]'>Select a destination</span>
@@ -329,7 +333,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                     }                    
                 </div>
 
-               <div className='flex justify-between items-center'>
+               <div className='flex gap-3 items-center'>
                     <div id="dateContainer" className='w-full flex flex-col gap-2 '>
                         <span>Chose a date:*</span>
                         {
@@ -354,11 +358,11 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                 <span className='text-[12px] text-red-500' >You must select a number greater than 0</span>
                             ):null
                         }
-                        <input  id="passengersNumber" type="number" min="0" placeholder='0' className={` ${ error&&errorType==='numberError'|| error&&errorType==='global' ? 'border-[1px] border-rose-500 ':'' } bg-gray-200 p-2`} onChange={(e)=>{handleDestination(e)}} />
+                        <input  id="passengersNumber" type="number" min="0" placeholder='0' className={` ${ error&&errorType==='numberError'|| error&&errorType==='global' ? 'border-[1px] border-rose-500 ':'w-[12em] ' } bg-gray-200 p-2`} onChange={(e)=>{handleDestination(e)}} />
                     </div>
                </div>
 
-               <div id="distance">
+               <div id="distanceContainer">
               
                 {
                     isCalculating?(
