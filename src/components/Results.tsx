@@ -32,9 +32,11 @@ const Results =({state}:DestinyProp)=>{
         <section className="w-full h-full flex items-center">
             <div className="bg-gray-300 p-3  max-w-[fit-content] w-full flex mx-auto" >
                 <div id="destiny_selected" className='w-full bg-white py-2 ' >
-
-                    <div id="cardHead" className='w-full flex flex-col gap-2 px-2'>
-                        <h1>Chosen destination:</h1>
+                    <div className='w-full flex flex-col justify-center '>
+                        <h1 className='text-center text-[20px]' >Travel<span className='text-rose-500' >App</span></h1>
+                    </div>
+                    <div id="cardHead" className='w-full flex flex-col gap-2 px-3'>
+                        <h1 className='pl-2' >Your destination recipe:</h1>
                         <div className='w-full flex justify-between gap-5 px-2' >
                             <div className='flex flex-col gap-2 items-start w-full ' >
                                 <label>
