@@ -2,7 +2,7 @@ import {useState} from 'react';
 import {Routes, Route}from 'react-router-dom';
 import Search from './components/Search'
 import Results from './components/Results';
-import { type } from '@testing-library/user-event/dist/type';
+
 
 export type DestinatioinType = {
   cityOrigin:string;
@@ -12,7 +12,7 @@ export type DestinatioinType = {
   cityIntermediate:[{
     city?:string
     location?:string
-  }][] ;
+  }];
   date:Date;
   passengersNumber:string;
   totalDistance:string

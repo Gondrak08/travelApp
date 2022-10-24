@@ -16,71 +16,47 @@ type IProps = {
 }
 
 
-interface IntermedCity{
-    cityIntermediate?:[{
-        city?:string
-        location?:string
-      }]
-}
-
-
 const Search = ({userDest, setUserDest}:IProps) =>{
     console.log(userDest);
-
     const [arr, arrSet] = useState<number[]>([]);
     const [cities, citiesSet] =  useState([] as any)
-
-    const [interCity, interCitySet] = useState<any>([])
-
-    // const [interCities, interCitiesSet] = useState<any>([]);
-
-
-
     const [interError, setInterError] = useState<boolean>(false);
     const [toLocation, setToLocation] = useState<any>({
         latitude:'',
         longitude:''
     });
-    
     const [fromLocation, setFromLocation] = useState<any>({
         latitude:'',
         longitude:''
     });
-    
     const [startDate, setStartDate] = useState(new Date());
-
     const [error, setError] = useState<boolean>(false);
     const [errorType, errorTypeSet] = useState<string>('');
-    
     
     const [isDistance,setIsDistance] = useState<boolean>(false);
     const [isCalculating, setIsCalculataing] = useState<boolean>(false)
     const [isReady, setIsReady] = useState<boolean>(false);
-    
     const navigate = useNavigate();
     
-
     useEffect(()=>{
         citiesSet(Data);
-        if(userDest.cityIntermediate){
-            if(userDest.cityIntermediate instanceof Array){
-                interCitySet(userDest.cityIntermediate)
-            }
-        }
+       
     },[])
 
     useEffect(()=>{
         if(Object.keys(userDest).length > 0){
-            // intermediateCities undone
-            // if(userDest.cityIntermediate && userDest.cityOrigin && userDest.cityIntermediate.includes(userDest.cityOrigin)||
-            // userDest.cityIntermediate && userDest.cityDestination && userDest.cityIntermediate.includes( userDest.cityDestination)
-            // ){
-            //     setError(true);
-            //     errorTypeSet('AdjasentCities');
-            // }
-            // else 
-            
-            if(userDest.cityOrigin && userDest.cityDestination &&
+            //Catching Erros 
+            if(userDest.cityIntermediate){
+                const arrNames:any = userDest.cityIntermediate.map((value, index)=>{return value.city});
+                if(arrNames.includes(userDest.cityOrigin)){
+                    setError(true);
+                    errorTypeSet('originSimilarToInterCity');
+                }
+                if( arrNames.includes(userDest.cityDestination)){
+                    setError(true);
+                    errorTypeSet('destinationSimilarToInterCity');
+                }
+            }else if(userDest.cityOrigin && userDest.cityDestination &&
                 userDest.cityOrigin == userDest.cityDestination){
                 setError(true);
                 errorTypeSet('similarCity');
@@ -89,65 +65,29 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                 setError(false);
                 errorTypeSet('');
             }
-
-            
         }
     },[userDest])
-
-    
-
-    console.log(interCity)
    
-    function handleDestination(e:any){
+    function handleDestination(e:any,index:any){
         // select values
         if(e.target.id === 'cityIntermediate'){
-
-            // interCitySet((state:any)=>{
-            //     let arr = [...state]
-            //     arr[arr.length] = {'city':e.target.value}
-            //     return ([...arr])
-            // })
-
             setUserDest(state=>{
-                // let old = [state['cityIntermediate']];
                 let arr:any = Object.assign([], state['cityIntermediate'])
-                arr[arr.length] = {'city':e.target.value};
-                
+                let selectedCities:any = [...arr.map((value:any, index:number)=> {if(value.city===e.target.value) return value.city})];
+                if(selectedCities.includes(e.target.value)){
+                    // alert('chose other name');
+                    setError(true);
+                    errorTypeSet('similarCity');
+                }else
+                arr[index] = {'city':e.target.value};
                 return { 
                     ...state,[ e.target.id]:[...arr] }
                 }
-            )
-
-            // if(userDest.cityIntermediate ){
-            //         interCitySet((state:any)=>{
-            //             let arr = [...state]
-            //             arr[arr.length] = {'city':e.target.value}
-            //             return ([...arr])
-            //         })
-  
-            //         setUserDest(state=>{
-            //             return { 
-            //                 ...state,[ e.target.id]: [...interCity] }
-            //             }
-            //         )
-                
-
-            // } else {
-
-            //     setUserDest(state=>{
-            //         return { 
-            //             ...state, [e.target.id]:[
-            //                 {
-            //                     ...state['cityIntermediate'], ['city']:e.target.value
-            //                 }
-            //             ]
-            //     }
-            //     })
-            // }
+            );
         }else 
             setUserDest(state=>{
                 return {...state,[e.target.id]: e.target.value}
-            })
+            });
 
         // calculating total Destination
         if(e.target.id === 'cityOrigin'||e.target.id === 'cityDestination'){
@@ -173,7 +113,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
             
         }
         
-    }
+    };
 
     function CalculateForm(e:any){
             e.preventDefault()
@@ -201,14 +141,14 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                 setIsCalculataing(true)
             }
             
-    }
+    };
     if(isCalculating){
         setTimeout(() => {
             setIsDistance(true);
             setIsCalculataing(false);
             setIsReady(true);
         }, 1900);
-    }
+    };
 
     function HandleSubmit(e:any){
         if(Object.keys(userDest).length > 0){
@@ -255,12 +195,10 @@ const Search = ({userDest, setUserDest}:IProps) =>{
         };
 
         e.preventDefault();
-    }
-
-    
+    };
 
     return(
-       <section className="w-full h-full flex items-center justify-center">
+    <section className="w-full h-full flex items-center justify-center">
             
            <form onSubmit={(e)=>{HandleSubmit(e)}} className="flex flex-col rounded-md p-3 gap-3 bg-white max-w-[30em] w-full h-[fit-content] "  >
                 <div className='w-full flex flex-col justify-center '>
@@ -288,9 +226,11 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                 <label>From:*</label>
                                 {error&&errorType==='cityOrigin'?(
                                      <span className='text-red-500 text-[8]'>Select a city of origin</span>
-                                ):null}
+                                ):error&&errorType==='originSimilarToInterCity'?(
+                                    <span className='text-red-500 text-[8]'>Origin cannot be similar to intermediate city</span>
+                                ) :null}
                                 <select id="cityOrigin" 
-                                className={`${error&&errorType==='similarCity'||error&&errorType==='global'||error&&errorType==='cityOrigin'?'border-[1px] border-rose-500 ':''} w-full p-3`} onChange={(e)=>{handleDestination(e)}} >
+                                className={`${error&&errorType==='similarCity'||error&&errorType==='global'||error&&errorType==='cityOrigin'||error&&errorType==='originSimilarToInterCity'?'border-[1px] border-rose-500 ':''} w-full p-3`} onChange={(e)=>{handleDestination(e, 0)}} >
                                     <option>City of origin</option>
                                     {cities && cities.map((item:[string], index:number)=>(
                                         <option key={index} >{item[0]}</option>
@@ -301,8 +241,10 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                 <label>To:*</label>
                                 {error&&errorType==='cityDestination'?(
                                      <span className='text-red-500 text-[8]'>Select a destination</span>
+                                ):error&&errorType==='destinationSimilarToInterCity' ? (
+                                    <span className='text-red-500 text-[8]'>Destination cannot be similar to a intermediate city</span>
                                 ):null}
-                                <select id="cityDestination" className={`${error&&errorType==='similarCity' ||  error&&errorType==='global'||error&&errorType==='cityDestination' ?'border-[1px] border-rose-500 ':''} w-full p-3`} onChange={(e)=>{handleDestination(e)}} >
+                                <select id="cityDestination" className={`${error&&errorType==='similarCity' ||  error&&errorType==='global'||error&&errorType==='cityDestination'||error&&errorType==='destinationSimilarToInterCity' ?'border-[1px] border-rose-500 ':''} w-full p-3`} onChange={(e)=>{handleDestination(e, 0)}} >
                                     <option>City of destination</option>
                                     {cities && cities.map((item:[string], index:number)=>(
                                         <option key={index} >{item[0]}</option>
@@ -319,47 +261,54 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                         <button className="bg-gray-200 px-2  "
                          onClick={(e: React.SyntheticEvent)=>{
                             e.preventDefault();
-                            arrSet([...arr, arr.length + 1])
+                            setUserDest((state:any) =>{
+                                    let arr:any = Object.assign([], state['cityIntermediate'])   
+                                    arr[arr.length] = {'city':''};
+                                    return {...state,['cityIntermediate']:[...arr]};
+                                }
+                            );
                          }}>Add</button>
                         {' '}  intermediate city
                     </span>
                     {
-                        arr.length >= 1 ? (
+                        userDest.cityIntermediate && userDest.cityIntermediate.length >= 1 ? (
                             <>
                                 {error&&errorType==='interCity'?(
                                     <span className='text-red-500' >Intermerdiate City cannot be similar to origin or destination city
                                     </span>
                                 ):null}
-                                <div className='grid grid-cols-3 gap-3 w-full' >
+
+                                <div className='grid grid-cols-3 gap-3 w-full'>
                                     {
-                                        arr.map((item, index)=>(
-                                          
+                                        userDest.cityIntermediate.map((item:any, index:number)=>(
                                             <div key={item} className='flex flex-col gap-1' >
-                                                <CiCircleRemove className='self-end'  onClick={(e: React.SyntheticEvent)=>{
-                                                    e.preventDefault();
-                                                    const newVal = arr.filter((i, k)=>{
-                                                        if(item !== i) return i
+                                            <CiCircleRemove className='self-end'  onClick={(e: React.SyntheticEvent)=>{
+                                                e.preventDefault();
+                                                if(userDest.cityIntermediate){
+                                                    const rmValue = userDest.cityIntermediate.filter((value:any, k:number)=>{
+                                                        if(item.city !== value.city) return value
                                                     });
-                                                    arrSet(newVal);
-                                                
-                                                }}/>
-                                                <select id="cityIntermediate" key={item} className={`${error&&errorType==='interCity'?'border-[1px] border-rose-500 ':''} w-full p-3`} onChange={(e)=>{handleDestination(e)}} >
-                                                        <option>select a city</option>
-                                                        {cities && cities.map((item:[string], index:number)=>(
-                                                            <>
-                                                            
+                                                    setUserDest((state:any)=>{return{...state,['cityIntermediate']: rmValue}});
+                                                }
+                                            }}/>
+                                            <select id="cityIntermediate" key={item} className={`${error&&errorType==='interCity'||error&&errorType==='originSimilarToInterCity'||error&&errorType==='destinationSimilarToInterCity'?'border-[1px] border-rose-500 ':''} w-full p-3`} 
+                                            value={item.city}
+                                            onChange={(e)=>{handleDestination(e, index)}} >
+                                                    <option>select a city</option>
+                                                    {cities && cities.map((item:[string], index:number)=>(
+                                                        <>
                                                             <option key={index}>{item[0]}</option>
-                                                            </>
-                                                        ))}
-                                                </select>
-                                            </div>
-                                        
+                                                        </>
+                                                    ))}
+                                            </select>
+                                        </div>
                                         ))
                                     }
                                 </div>
                             </>
-                        ): null
-                    }                    
+                        ):null
+                    }
+
                 </div>
 
                <div className='flex gap-3 items-center'>
@@ -387,7 +336,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                 <span className='text-[12px] text-red-500' >You must select a number greater than 0</span>
                             ):null
                         }
-                        <input  id="passengersNumber" type="number" min="0" placeholder='0' className={` ${ error&&errorType==='numberError'|| error&&errorType==='global' ? 'border-[1px] border-rose-500 ':'w-[12em] ' } bg-gray-200 p-2`} onChange={(e)=>{handleDestination(e)}} />
+                        <input  id="passengersNumber" type="number" min="0" placeholder='0' className={` ${ error&&errorType==='numberError'|| error&&errorType==='global' ? 'border-[1px] border-rose-500 ':'w-[12em] ' } bg-gray-200 p-2`} onChange={(e)=>{handleDestination(e, 0)}} />
                     </div>
                </div>
 
