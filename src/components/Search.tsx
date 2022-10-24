@@ -286,7 +286,8 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                                 e.preventDefault();
                                                 if(userDest.cityIntermediate){
                                                     const rmValue = userDest.cityIntermediate.filter((value:any, k:number)=>{
-                                                        if(item.city !== value.city) return value
+                                                        if(value.city && item.city !== value.city) return value
+                                                        else if(index !== k) return item
                                                     });
                                                     setUserDest((state:any)=>{return{...state,['cityIntermediate']: rmValue}});
                                                 }
