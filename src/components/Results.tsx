@@ -2,6 +2,7 @@ import {useState, useEffect} from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import DatePicker from "react-datepicker";
 import{DestinatioinType} from '../App'
+import haversine from 'haversine-distance';
 
 
 type DestinyProp = {
@@ -10,20 +11,23 @@ type DestinyProp = {
 
 const Results =({state}:DestinyProp)=>{
     const [interDes, setInterDes] = useState<any>()
+    const [totalDistance, setTotalDistance]=useState<string>()
     const [cityData, setCityData]=useState<any>()
     const [urlData, setUrlData] = useState<any>()
     const [isUrl, setIsUrl] = useState<boolean>(false);
+    const [isCalculating ,setIsCalculataing] = useState<boolean>(false);
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
 
     let date;
 
-    useEffect(()=>{        
-        
+    useEffect(()=>{                
         if(Object.keys(state).length ===0){
             let searchData = {
                 origin:searchParams?.get('originCity'),
+                originLoc:searchParams?.get('originLoc'),
                 destination:searchParams?.get('destinationCity'),
+                destinationLoc:searchParams?.get('destinationLoc'),
                 passenger:searchParams?.get('passengerNumber'),
                 intermediateCities: searchParams?.get('cityIntermediate'),
                 date: searchParams?.get('date'),
@@ -48,6 +52,7 @@ const Results =({state}:DestinyProp)=>{
         if(cityData?.cityIntermediate)
             setInterDes(cityData.cityIntermediate); 
        
+        CalculateDestination();
     },[cityData])
     
     
@@ -60,6 +65,92 @@ const Results =({state}:DestinyProp)=>{
         date = new Date(urlData.date)
     };
     
+
+
+    function CalculateDestination(){
+        // e.preventDefault()
+        if(cityData){
+            if(cityData.originLocation && cityData.destinationLocation){
+                if(cityData.originLocation.latitude && cityData.originLocation.longitude){
+                
+                const origin = {
+                    latitude:cityData.originLocation?.latitude, 
+                    longitude:cityData.originLocation?.longitude
+                };
+                const destination = {
+                    latitude:cityData.destinationLocation?.latitude, 
+                    longitude:cityData.destinationLocation?.longitude
+                };
+                const interLocations:any = cityData.cityIntermediate&&cityData.cityIntermediate?.length >= 1 ? [...cityData.cityIntermediate.map((item:any, index:number)=>{
+                    return{latitude:item.location?.latitude, longitude:item.location?.longitude};
+                })]:null;
+
+               
+
+               if(interLocations){
+                    if(interLocations.length === 1){
+                        // for 3 distances
+                        const a = haversine(origin, interLocations[0]);
+                        const b = haversine(interLocations[0], destination);
+                        const c = a + b;
+                        const total = (a+b) + (b+c); 
+                        const transformToKm = JSON.stringify(Math.round(total/100)/10);
+                        setTotalDistance(transformToKm );
+                        setIsCalculataing(true);  
+                    };
+                    if( interLocations.length === 2){
+                        // for 4 distances 
+                        const a = haversine(origin, interLocations[0])
+                        const b = haversine(interLocations[0], interLocations[1]);
+                        const c = haversine(interLocations[1], destination)       
+                        const total = (a + b) + (b+c);
+                        const transformToKm = JSON.stringify(Math.round(total/100)/10);
+                        console.log(transformToKm, '4');    
+                        setTotalDistance(transformToKm );
+                        setIsCalculataing(true);
+                    }        
+                    if( interLocations.length > 2 ){
+                       
+                        const startPoint = haversine(origin, interLocations[0]);
+                        const startMidCc  = haversine(interLocations[0], interLocations[1]);
+                        
+                        const lastElement = interLocations[interLocations.length - 1];
+                        const finalMidCc = haversine(interLocations[interLocations.length -2], lastElement);
+                        const finalDestiny = haversine(lastElement, destination);
+
+                        let midvalueArr:any=[];
+                        let i=1;
+                        while(i < interLocations.length - 1){
+                            let value = haversine(interLocations[i], interLocations[i+1])
+                            midvalueArr.push(value)
+                            i++;
+                        }
+                        
+                        let sumMidValue = midvalueArr.reduce((accumulator:any, value:any)=> accumulator + value,0)
+
+                        console.log(sumMidValue, 'sumMidValue')
+                        let total = (startPoint + startMidCc) + (startMidCc + midvalueArr[0]) + sumMidValue + (midvalueArr[midvalueArr.length -1] + finalMidCc) + (finalMidCc + finalDestiny);
+                        const transformToKm = JSON.stringify(Math.round(total/100)/10);
+
+                    }    
+               }else{
+                    const total = haversine(origin, destination);
+                    const transformToKm = JSON.stringify(Math.round(total/100)/10);
+                    setTotalDistance(transformToKm);
+                    setIsCalculataing(true);
+                }
+
+               
+            }
+        }
+      }
+        
+};
+
+
+console.log(totalDistance);
+
+
     
     return(
         <section className="w-full h-full flex items-center">

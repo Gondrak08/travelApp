@@ -56,7 +56,6 @@ const Search = ({userDest, setUserDest}:IProps) =>{
             }
         }
     },[userDest]);
-   
     function handleDestination(e:any,index:any){
         // select values
         if(e.target.id === 'cityIntermediate'){
@@ -118,7 +117,6 @@ const Search = ({userDest, setUserDest}:IProps) =>{
         // };
         
     };
-
     function CalculateDestination(e:any){
             e.preventDefault()
 
@@ -157,7 +155,34 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                             setIsCalculataing(true);
                         }        
                         if( interLocations.length > 2 ){
-                            console.log('this is bigger than two. Deal with it.')
+                            console.log('this is bigger than two. Deal with it.');
+                            const startPoint = haversine(origin, interLocations[0]);
+                            const startMidCc  = haversine(interLocations[0], interLocations[1]);
+                            
+                            const lastElement = interLocations[interLocations.length - 1];
+                            const finalMidCc = haversine(interLocations[interLocations.length -2], lastElement);
+                            const finalDestiny = haversine(lastElement, destination);
+
+                            let midvalueArr:any=[];
+                            let i=1;
+                            while(i < interLocations.length - 1){
+                                let value = haversine(interLocations[i], interLocations[i+1])
+                                midvalueArr.push(value)
+                                i++;
+                            }
+                            console.log(midvalueArr, "midvalueArr");
+                            
+                            let sumMidValue = midvalueArr.reduce((accumulator:any, value:any)=> accumulator + value,0)
+
+                            console.log(sumMidValue, 'sumMidValue')
+                            let total = (startPoint + startMidCc) + (startMidCc + midvalueArr[0]) + sumMidValue + (midvalueArr[midvalueArr.length -1] + finalMidCc) + (finalMidCc + finalDestiny);
+                            const transformToKm = JSON.stringify(Math.round(total/100)/10);
+                            console.log(transformToKm, 'ToKm')
+                            setUserDest({...userDest,['totalDistance']: transformToKm });
+
+                    
+                            setIsCalculataing(true);
+
                         }    
                    }else{
                         const total = haversine(origin, destination);
@@ -169,30 +194,6 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                    
                 }
             }
-
-
-            // if(fromLocation){
-            //     const originLoc = haversine(fromLocation.latitude, fromLocation.longitude);
-            //     const Km = JSON.stringify(Math.round(originLoc/100)/10);
-            //     setUserDest((state:any)=>{
-            //         return {...state,['originLocation']: Km}
-            //     })
-            // }
-
-            // if(toLocation.latitude){
-            //     const destinLoc = haversine(toLocation.latitude, toLocation.longitude);
-            //     const Km = JSON.stringify(Math.round(destinLoc/100)/10);
-            //     setUserDest((state:any)=>{
-            //         return {...state,['destinationLocation']: Km}
-            //     })
-            // }
-
-            // if(toLocation.latitude && fromLocation.latitude){
-            //     const total = haversine(fromLocation, toLocation)
-            //     const Km = JSON.stringify(Math.round(total/100)/10);
-            //     setUserDest({...userDest,['totalDistance']: Km })
-            //     setIsCalculataing(true)
-            // }
             
     };
     if(isCalculating){
@@ -205,18 +206,20 @@ const Search = ({userDest, setUserDest}:IProps) =>{
 
     function HandleSubmit(e:any){
         if(isReady){
-            const params:any = {
-                originCity:userDest.cityOrigin, 
-                destinationCity:userDest.cityDestination, 
-                cityIntermediate:JSON.stringify(userDest.cityIntermediate), 
-                passengerNumber:userDest.passengersNumber, 
-                date:userDest.date, 
-                totalDistance:userDest.totalDistance
-            };
-            navigate({
-                pathname:'/results',
-                search: `?${createSearchParams(params)}`
-            });
+            // const params:any = {
+            //     originCity:userDest.cityOrigin,
+            //     originLoc:JSON.stringify(userDest.originLocation), 
+            //     destinationCity:userDest.cityDestination,
+            //     destinationLoc:JSON.stringify(userDest.destinationLocation),
+            //     cityIntermediate:JSON.stringify(userDest.cityIntermediate), 
+            //     passengerNumber:userDest.passengersNumber, 
+            //     date:userDest.date, 
+            //     totalDistance:userDest.totalDistance
+            // };
+            // navigate({
+            //     pathname:'/results',
+            //     search: `?${createSearchParams(params)}`
+            // });
             
             setIsCalculataing(true);
         } else { 
@@ -262,8 +265,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
     };
 
     return(
-    <section className="w-full h-full flex items-center justify-center">
-            
+    <section className="w-full h-full flex items-center justify-center">            
            <form onSubmit={(e)=>{HandleSubmit(e)}} className="flex flex-col rounded-md p-3 gap-3 bg-white max-w-[30em] w-full h-[fit-content] "  >
                 <div className='w-full flex flex-col justify-center '>
                     <h1 className='text-center text-[20px]' >Travel<span className='text-rose-500' >App</span></h1>
@@ -351,7 +353,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                 <div className='grid grid-cols-3 gap-3 w-full'>
                                     {
                                         userDest.cityIntermediate.map((item:any, index:number)=>(
-                                            <div key={item} className='flex flex-col gap-1' >
+                                            <div key={index} className='flex flex-col gap-1' >
                                             <CiCircleRemove className='self-end'  onClick={(e: React.SyntheticEvent)=>{
                                                 e.preventDefault();
                                                 if(userDest.cityIntermediate){
@@ -366,9 +368,9 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                             value={item.city}
                                             onChange={(e)=>{handleDestination(e, index)}} >
                                                     <option>select a city</option>
-                                                    {cities && cities.map((item:[string], index:number)=>(
+                                                    {cities && cities.map((item:[string], key:number)=>(
                                                         <>
-                                                            <option key={index}>{item[0]}</option>
+                                                            <option key={key}>{item[0]}</option>
                                                         </>
                                                     ))}
                                             </select>
@@ -451,8 +453,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                         userDest.date&&
                         userDest.passengersNumber&&
                         userDest.passengersNumber !== '0'&& !isCalculating &&
-                        !error ? 'bg-blue-500 text-white': isCalculating ? 'bg-rose-500 text-white': 'bg-gray-300 cursor-not-allowed '} p-2 rounded-sm`}
-                       
+                        !error ? 'bg-blue-500 text-white': isCalculating ? 'bg-rose-500 text-white': 'bg-gray-300 cursor-not-allowed '} p-2 rounded-sm`}                       
                         >
                             {isCalculating? "Calculating route..." : isReady? "Ready!" : "Calculate Route"}
                         </button>
