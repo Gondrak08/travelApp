@@ -17,10 +17,8 @@ type IProps = {
 
 
 const Search = ({userDest, setUserDest}:IProps) =>{
-    console.log(userDest);
-    const [arr, arrSet] = useState<number[]>([]);
+    // console.log(userDest.destinationLocation?.latitude);
     const [cities, citiesSet] =  useState([] as any)
-    const [interError, setInterError] = useState<boolean>(false);
     const [toLocation, setToLocation] = useState<any>({
         latitude:'',
         longitude:''
@@ -29,6 +27,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
         latitude:'',
         longitude:''
     });
+    
     const [startDate, setStartDate] = useState(new Date());
     const [error, setError] = useState<boolean>(false);
     const [errorType, errorTypeSet] = useState<string>('');
@@ -40,9 +39,8 @@ const Search = ({userDest, setUserDest}:IProps) =>{
     
     useEffect(()=>{
         citiesSet(Data);
-       
-    },[])
-
+    },[]);
+    // Handling Errors:
     useEffect(()=>{
         if(Object.keys(userDest).length > 0){
             //Catching Erros 
@@ -66,7 +64,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                 errorTypeSet('');
             }
         }
-    },[userDest])
+    },[userDest]);
    
     function handleDestination(e:any,index:any){
         // select values
@@ -74,72 +72,136 @@ const Search = ({userDest, setUserDest}:IProps) =>{
             setUserDest(state=>{
                 let arr:any = Object.assign([], state['cityIntermediate'])
                 let selectedCities:any = [...arr.map((value:any, index:number)=> {if(value.city===e.target.value) return value.city})];
+                const city = cities.filter((value:any,key:number)=>{if(e.target.value === value[0]) return [...value]});
                 if(selectedCities.includes(e.target.value)){
-                    // alert('chose other name');
                     setError(true);
-                    errorTypeSet('similarCity');
+                    errorTypeSet('interCity');
                 }else
-                arr[index] = {'city':e.target.value};
+                arr[index] = {'city':e.target.value, 'location':{'latitude':city[0][1], 'longitude': city[0][2]}};
                 return { 
                     ...state,[ e.target.id]:[...arr] }
                 }
             );
-        }else 
+        }else {
             setUserDest(state=>{
                 return {...state,[e.target.id]: e.target.value}
             });
+            if(e.target.id === 'cityOrigin'|| e.target.id === 'cityDestination'){
+                const location = cities.filter((value:any,key:number)=>{
+                    if(e.target.value === value[0]) return [...value]
+                });
+                if(e.target.id==='cityOrigin') setUserDest((state)=>{return{...state, ['originLocation']:{'latitude':location[0][1], 'longitude':location[0][2]}}});
+
+                if(e.target.id==='cityDestination') setUserDest((state)=>{return{...state, ['destinationLocation']:{'latitude':location[0][1], 'longitude':location[0][2]}}});    
+            }
+        } 
 
         // calculating total Destination
-        if(e.target.id === 'cityOrigin'||e.target.id === 'cityDestination'){
-            const keyName = e.target.value;
-            const item = cities.filter((value:any,key:number)=>{
-                if(keyName === value[0]) return [...value]
-            })
-            if(e.target.id === 'cityOrigin'){
-                setFromLocation((state:any)=>{
-                    state['latitude'] = item[0][1];
-                    state['longitude'] = item[0][2];
-                    return({...state})
-                });
-            }
-            if(e.target.id === 'cityDestination'){
-                setToLocation((state:any)=>{
-                    state['latitude'] = item[0][1];
-                    state['longitude'] = item[0][2];
-
-                    return({...state})
-                });
-            }
-            
-        }
+        // if(e.target.id === 'cityOrigin'||
+        // e.target.id === 'cityDestination'){
+        //     const keyName = e.target.value;
+        //     const item = cities.filter((value:any,key:number)=>{
+        //         if(keyName === value[0]) return [...value]
+        //     })
+        //     if(e.target.id === 'cityOrigin'){
+        //         setFromLocation((state:any)=>{
+        //             state['latitude'] = item[0][1];
+        //             state['longitude'] = item[0][2];
+        //             return({...state});
+        //         });
+        //     };
+        //     if(e.target.id === 'cityDestination'){
+        //         setToLocation((state:any)=>{
+        //             state['latitude'] = item[0][1];
+        //             state['longitude'] = item[0][2];
+        //             return({...state});
+        //         });
+        //     };
+        //     // if(e.target.id==='cityIntermediate'){
+        //     //     setIntermedLocation((state:any)=>{
+        //     //         state['latitude'] = item[0][1];
+        //     //         state['longitude'] = item[0][2];
+        //     //         return({...state});
+        //     //     })
+        //     // }
+        // };
         
     };
 
-    function CalculateForm(e:any){
+    function CalculateDestination(e:any){
             e.preventDefault()
 
-            if(fromLocation){
-                const originLoc = haversine(fromLocation.latitude, fromLocation.longitude);
-                const Km = JSON.stringify(Math.round(originLoc/100)/10);
-                setUserDest(state=>{
-                    return {...state,['originLocation']: Km}
-                })
+            if(userDest.originLocation && userDest.destinationLocation){
+                if(userDest.originLocation.latitude && userDest.originLocation.longitude){
+                    const origin = {
+                        latitude:userDest.originLocation?.latitude, 
+                        longitude:userDest.originLocation?.longitude
+                    };
+                    const destination = {
+                        latitude:userDest.destinationLocation?.latitude, 
+                        longitude:userDest.destinationLocation?.longitude
+                    };
+                    const interLocations:any = userDest.cityIntermediate&&userDest.cityIntermediate?.length >= 1 ? [...userDest.cityIntermediate.map((item, index)=>{return{latitude:item.location?.latitude, longitude:item.location?.longitude}})]:null
+
+                   if(interLocations){
+                        if(interLocations.length === 1){
+                            const a = haversine(origin, interLocations[0]);
+                            const b = haversine(interLocations[0], destination);
+                            const c = a + b;
+                            const total = (a+b) + (b+c); 
+                            const transformToKm = JSON.stringify(Math.round(total/100)/10);
+                            setUserDest({...userDest,['totalDistance']: transformToKm });
+                            setIsCalculataing(true);
+                        };
+                        if( interLocations.length === 2){ 
+                            const a = haversine(origin, interLocations[0])
+                            const b = haversine(interLocations[1], destination)       
+                            const total = a + b;
+                            const transformToKm = JSON.stringify(Math.round(total/100)/10);
+                            console.log(transformToKm);    
+                            setUserDest({...userDest,['totalDistance']: transformToKm });
+                            setIsCalculataing(true);
+                        }        
+                        if( interLocations.length > 2 ){
+                            console.log('this is bigger than two. Deal with it.')
+                        }    
+                   }else{
+                        const total = haversine(origin, destination);
+                        const transformToKm = JSON.stringify(Math.round(total/100)/10);
+                        setUserDest({...userDest,['totalDistance']: transformToKm });
+                        setIsCalculataing(true);
+                    }
+
+                    // const total = haversine(origin, destination);
+                    // const transformToKm = JSON.stringify(Math.round(total/100)/10);
+                    // setUserDest({...userDest,['totalDistance']: transformToKm });
+                    // setIsCalculataing(true);
+                }
             }
 
-            if(toLocation.latitude){
-                const destinLoc = haversine(toLocation.latitude, toLocation.longitude);
-                const Km = JSON.stringify(Math.round(destinLoc/100)/10);
-                setUserDest(state=>{
-                    return {...state,['destinationLocation']: Km}
-                })
-            }
 
-            if(toLocation.latitude && fromLocation.latitude){
-                const total = haversine(fromLocation, toLocation)
-                const Km = JSON.stringify(Math.round(total/100)/10);
-                setUserDest({...userDest,['totalDistance']: Km })
-                setIsCalculataing(true)
-            }
+            // if(fromLocation){
+            //     const originLoc = haversine(fromLocation.latitude, fromLocation.longitude);
+            //     const Km = JSON.stringify(Math.round(originLoc/100)/10);
+            //     setUserDest((state:any)=>{
+            //         return {...state,['originLocation']: Km}
+            //     })
+            // }
+
+            // if(toLocation.latitude){
+            //     const destinLoc = haversine(toLocation.latitude, toLocation.longitude);
+            //     const Km = JSON.stringify(Math.round(destinLoc/100)/10);
+            //     setUserDest((state:any)=>{
+            //         return {...state,['destinationLocation']: Km}
+            //     })
+            // }
+
+            // if(toLocation.latitude && fromLocation.latitude){
+            //     const total = haversine(fromLocation, toLocation)
+            //     const Km = JSON.stringify(Math.round(total/100)/10);
+            //     setUserDest({...userDest,['totalDistance']: Km })
+            //     setIsCalculataing(true)
+            // }
             
     };
     if(isCalculating){
@@ -151,49 +213,57 @@ const Search = ({userDest, setUserDest}:IProps) =>{
     };
 
     function HandleSubmit(e:any){
-        if(Object.keys(userDest).length > 0){
-            if(userDest.cityOrigin&&
-                userDest.cityDestination&&
-                userDest.date&&
-                userDest.passengersNumber&&
-                userDest.passengersNumber !== '0'
-                && !error
-                ){
-                    CalculateForm(e)  
-                }else{
-                    if(!userDest.cityOrigin){
-                        setError(true);
-                        errorTypeSet('cityOrigin');
-                    } 
-                    else if(!userDest.cityDestination){
-                        setError(true);
-                        errorTypeSet('cityDestination');
-                    }
-                    else if(userDest.cityDestination === userDest.cityOrigin){
-                        setError(true);
-                        errorTypeSet('similarCity');
-                    } 
-                    else if(!userDest.date){
-                        setError(true)
-                        errorTypeSet("date")
-                    }else if(!userDest.passengersNumber||userDest.passengersNumber&&userDest.passengersNumber ==='0'){
-                        setError(true)
-                        errorTypeSet('numberError')
-                    }
-                    else{
-                        setError(true);
-                        errorTypeSet("global");
-                    }
-                }
-        } else{
-            setError(true);
-            errorTypeSet("global");
-        }
-
         if(isReady){
-            navigate('/results')
-        };
-
+            // navigate('/results');
+            setIsCalculataing(true);
+        } else { 
+            if(Object.keys(userDest).length > 0){
+                // let isInterCity:any = userDest.cityIntermediate && userDest.cityIntermediate.length >=1 ?userDest.cityIntermediate.map((value:any, key:number)=>{
+                //     if(value.city === '') return true
+                // }): false
+    
+                // if(isInterCity){
+                //     setError(true);
+                //     errorTypeSet('emptyInterCity');
+                // }else 
+                
+                if(userDest.cityOrigin&&
+                    userDest.cityDestination&&
+                    userDest.date&&
+                    userDest.passengersNumber&&
+                    userDest.passengersNumber !== '0'
+                    ){
+                        CalculateDestination(e);
+                    }else{
+                        if(!userDest.cityOrigin){
+                            setError(true);
+                            errorTypeSet('cityOrigin');
+                        } 
+                        else if(!userDest.cityDestination){
+                            setError(true);
+                            errorTypeSet('cityDestination');
+                        }
+                        else if(userDest.cityDestination === userDest.cityOrigin){
+                            setError(true);
+                            errorTypeSet('similarCity');
+                        } 
+                        else if(!userDest.date){
+                            setError(true)
+                            errorTypeSet("date")
+                        }else if(!userDest.passengersNumber||userDest.passengersNumber&&userDest.passengersNumber ==='0'){
+                            setError(true)
+                            errorTypeSet('numberError')
+                        }
+                        else {
+                            setError(true);
+                            errorTypeSet("global");
+                        }
+                    };
+                } else{
+                    setError(true);
+                    errorTypeSet("global");
+                }
+            };
         e.preventDefault();
     };
 
@@ -273,10 +343,16 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                     {
                         userDest.cityIntermediate && userDest.cityIntermediate.length >= 1 ? (
                             <>
-                                {error&&errorType==='interCity'?(
-                                    <span className='text-red-500' >Intermerdiate City cannot be similar to origin or destination city
+                                {error&&errorType==='originSimilarToInterCity'?(
+                                    <span className='text-red-500' >Intermerdiate City cannot be similar to city of origin
                                     </span>
-                                ):null}
+                                ):error&&errorType==='destinationSimilarToInterCity'?(
+                                    <span className='text-red-500' >Intermerdiate City cannot be similar to city of destination
+                                    </span>
+                                ):error&&errorType==='emptyInterCity'? (
+                                    <span className='text-red-500' >Intermerdiate City cannot be send empty
+                                    </span>
+                                ) :null}
 
                                 <div className='grid grid-cols-3 gap-3 w-full'>
                                     {

@@ -6,12 +6,12 @@ import Results from './components/Results';
 
 export type DestinatioinType = {
   cityOrigin:string;
-  originLocation:string;
+  originLocation?:{latitude?:any; longitude?:any;};
   cityDestination:string;
-  destinationLocation:string;
+  destinationLocation?:{latitude?:any; longitude?:any;};
   cityIntermediate:[{
     city?:string
-    location?:string
+    location?:{latitude?:any; longitude?:any;};
   }];
   date:Date;
   passengersNumber:string;
