@@ -205,7 +205,14 @@ const Search = ({userDest, setUserDest}:IProps) =>{
 
     function HandleSubmit(e:any){
         if(isReady){
-            const params:any = { originCity:userDest.cityOrigin, destinationCity:userDest.cityDestination, cityIntermediate:userDest.cityIntermediate??null, passengerNumber:userDest.passengersNumber, date:userDest.date, totalDistance:userDest.totalDistance };
+            const params:any = {
+                originCity:userDest.cityOrigin, 
+                destinationCity:userDest.cityDestination, 
+                cityIntermediate:JSON.stringify(userDest.cityIntermediate), 
+                passengerNumber:userDest.passengersNumber, 
+                date:userDest.date, 
+                totalDistance:userDest.totalDistance
+            };
             navigate({
                 pathname:'/results',
                 search: `?${createSearchParams(params)}`

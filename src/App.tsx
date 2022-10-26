@@ -21,7 +21,6 @@ export type DestinatioinType = {
 function App() {
   const [state, setState] = useState<Partial<DestinatioinType>>({});
 
-  
   return (
     <div className='w-full h-screen bg-[#3671E9]'>
       <Routes>

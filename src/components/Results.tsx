@@ -9,45 +9,56 @@ type DestinyProp = {
 }
 
 const Results =({state}:DestinyProp)=>{
-    const [data, setData] = useState<any>()
+    const [interDes, setInterDes] = useState<any>()
+    const [cityData, setCityData]=useState<any>()
     const [urlData, setUrlData] = useState<any>()
-    // const [date, setDate] = useState(new Date());
     const [isUrl, setIsUrl] = useState<boolean>(false);
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
 
-    let date = null;
+    let date;
 
     useEffect(()=>{        
-        if(Object.keys(state).length > 0){
-            // setDate(new Date(state.date))
-        } else if(searchParams?.get('originCity')){
+        
+        if(Object.keys(state).length ===0){
             let searchData = {
                 origin:searchParams?.get('originCity'),
                 destination:searchParams?.get('destinationCity'),
                 passenger:searchParams?.get('passengerNumber'),
+                intermediateCities: searchParams?.get('cityIntermediate'),
                 date: searchParams?.get('date'),
                 total:searchParams?.get('totalDistance')  
             }
             setIsUrl(true);
-            setUrlData({...searchData})
-            
-        } 
+            setUrlData({...searchData});
+        }else
+         if(Object.keys(state).length > 0){
+            setCityData(state)
+        }
         else { 
             navigate('/');
         }
     },[]);
 
-
+    useEffect(()=>{
+        if(isUrl&&urlData?.intermediateCities) 
+            setInterDes(JSON.parse(urlData.intermediateCities)); 
+    },[urlData])
+    useEffect(()=>{
+        if(cityData?.cityIntermediate)
+            setInterDes(cityData.cityIntermediate); 
+       
+    },[cityData])
+    
+    
+    if(cityData&&Object.keys(cityData).length > 0){
+        let a:any = state.date;
+        date = new Date(a);
+    }
+    else 
     if(isUrl){
         date = new Date(urlData.date)
-        console.log(urlData);
     };
-    if(state){
-        let a:any = state.date;
-        date = new Date(a);    
-        console.log(date);
-    }
     
     
     return(
@@ -79,13 +90,31 @@ const Results =({state}:DestinyProp)=>{
                             <label>Date:</label>
                             <DatePicker
                                 className='p-3 bg-gray-200'  
-                                selected={date??null}  
+                                selected={date}  
                                 minDate={new Date()}
                                 disabled
                                 onChange={()=>{}}
                                 />
                             </div>
                         </div>
+                    </div>
+
+                    <div id="intermeDestinies" className={`${interDes?.length >= 1?'flex flex-col gap-3 w-full  pt-3 px-5':''}`} >
+
+                        <h3>intermediate cities</h3>
+
+                        {
+                            interDes?.length >= 1? (
+                                <div className='flex gap-3 w-full h-full' >
+                                
+                                {interDes.map((item:any, index:number)=>(
+                                    <>
+                                    <input className='w-[fit-content] bg-gray-200 p-3' type="text" disabled value={item.city} />
+                                    </>
+                                ))}
+                            </div>
+                            ) :null
+                        }
                     </div>
 
                     <div id="numberOfPassengers" className='w-full flex justify-between px-5 py-3'>
