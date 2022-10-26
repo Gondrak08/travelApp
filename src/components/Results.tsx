@@ -1,32 +1,54 @@
 import {useState, useEffect} from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import DatePicker from "react-datepicker";
 import{DestinatioinType} from '../App'
+
+
 type DestinyProp = {
     state:Partial<DestinatioinType>
 }
 
-
-
 const Results =({state}:DestinyProp)=>{
     const [data, setData] = useState<any>()
-    const [startDate, setStartDate] = useState(new Date());
-    const navigate = useNavigate()
+    const [urlData, setUrlData] = useState<any>()
+    // const [date, setDate] = useState(new Date());
+    const [isUrl, setIsUrl] = useState<boolean>(false);
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
 
-    // const query = new URLSearchParams(useLocation().search())
+    let date = null;
 
-    useEffect(()=>{
+    useEffect(()=>{        
         if(Object.keys(state).length > 0){
-            setData(state)
+            // setDate(new Date(state.date))
+        } else if(searchParams?.get('originCity')){
+            let searchData = {
+                origin:searchParams?.get('originCity'),
+                destination:searchParams?.get('destinationCity'),
+                passenger:searchParams?.get('passengerNumber'),
+                date: searchParams?.get('date'),
+                total:searchParams?.get('totalDistance')  
+            }
+            setIsUrl(true);
+            setUrlData({...searchData})
+            
+        } 
+        else { 
+            navigate('/');
         }
-        if(Object.keys(state).length <= 0){
-            navigate("/")
-        }
-    },[])
+    },[]);
 
-    if(data){
-        console.log(data)
+
+    if(isUrl){
+        date = new Date(urlData.date)
+        console.log(urlData);
+    };
+    if(state){
+        let a:any = state.date;
+        date = new Date(a);    
+        console.log(date);
     }
+    
     
     return(
         <section className="w-full h-full flex items-center">
@@ -42,20 +64,22 @@ const Results =({state}:DestinyProp)=>{
                                 <label>
                                     From:
                                 </label>
-                                <input className='w-[fit-content] bg-gray-200 p-3' type="text" disabled value={state.cityOrigin} />
+                                
+                                <input className='w-[fit-content] bg-gray-200 p-3' type="text" disabled value={isUrl ? urlData.origin : state.cityOrigin} />
+                                
                                 
                             </div>
                             <div className='flex flex-col gap-2 items-start w-full' >
                                 <label>
                                 To:
                                 </label>
-                                <input className='w-[fit-content] bg-gray-200 p-3' type="text" disabled value={state.cityDestination} />
+                                <input className='w-[fit-content] bg-gray-200 p-3' type="text" disabled value={isUrl ? urlData.destination : state.cityDestination} />
                             </div>
                             <div className='flex flex-col items-start gap-2' >
                             <label>Date:</label>
                             <DatePicker
                                 className='p-3 bg-gray-200'  
-                                selected={data?data.date:null}  
+                                selected={date??null}  
                                 minDate={new Date()}
                                 disabled
                                 onChange={()=>{}}
@@ -69,13 +93,13 @@ const Results =({state}:DestinyProp)=>{
                             <label>
                                 number of passengers:
                             </label>
-                            <input className='w-[2em] bg-gray-200 px-2' type="text" disabled value={state.passengersNumber} />        
+                            <input className='w-[2em] bg-gray-200 px-2' type="text" disabled value={isUrl ? urlData.passenger : state.passengersNumber} />        
                         </div>
                         <div className='flex  items-center gap-2 justify-end w-full' >
                             <label>
                                 Total distance:
                             </label>
-                            <span> {state.totalDistance} km </span>       
+                            <span> {isUrl ? urlData.total : state.totalDistance} km </span>       
                         </div>
                     </div>
                 </div>

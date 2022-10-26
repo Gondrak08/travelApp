@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react'
-import {useNavigate} from 'react-router-dom';
+import {createSearchParams, useNavigate} from 'react-router-dom';
 import {CiCircleRemove} from 'react-icons/ci';
 import Data from '../data/index'
 import DatePicker from "react-datepicker";
@@ -18,16 +18,7 @@ type IProps = {
 
 const Search = ({userDest, setUserDest}:IProps) =>{
     // console.log(userDest.destinationLocation?.latitude);
-    const [cities, citiesSet] =  useState([] as any)
-    const [toLocation, setToLocation] = useState<any>({
-        latitude:'',
-        longitude:''
-    });
-    const [fromLocation, setFromLocation] = useState<any>({
-        latitude:'',
-        longitude:''
-    });
-    
+    const [cities, citiesSet] =  useState([] as any);
     const [startDate, setStartDate] = useState(new Date());
     const [error, setError] = useState<boolean>(false);
     const [errorType, errorTypeSet] = useState<string>('');
@@ -214,19 +205,15 @@ const Search = ({userDest, setUserDest}:IProps) =>{
 
     function HandleSubmit(e:any){
         if(isReady){
-            // navigate('/results');
+            const params:any = { originCity:userDest.cityOrigin, destinationCity:userDest.cityDestination, cityIntermediate:userDest.cityIntermediate??null, passengerNumber:userDest.passengersNumber, date:userDest.date, totalDistance:userDest.totalDistance };
+            navigate({
+                pathname:'/results',
+                search: `?${createSearchParams(params)}`
+            });
+            
             setIsCalculataing(true);
         } else { 
             if(Object.keys(userDest).length > 0){
-                // let isInterCity:any = userDest.cityIntermediate && userDest.cityIntermediate.length >=1 ?userDest.cityIntermediate.map((value:any, key:number)=>{
-                //     if(value.city === '') return true
-                // }): false
-    
-                // if(isInterCity){
-                //     setError(true);
-                //     errorTypeSet('emptyInterCity');
-                // }else 
-                
                 if(userDest.cityOrigin&&
                     userDest.cityDestination&&
                     userDest.date&&
