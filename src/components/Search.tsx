@@ -145,6 +145,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
 
                    if(interLocations){
                         if(interLocations.length === 1){
+                            // for 3 distances
                             const a = haversine(origin, interLocations[0]);
                             const b = haversine(interLocations[0], destination);
                             const c = a + b;
@@ -153,12 +154,14 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                             setUserDest({...userDest,['totalDistance']: transformToKm });
                             setIsCalculataing(true);
                         };
-                        if( interLocations.length === 2){ 
+                        if( interLocations.length === 2){
+                            // for 4 distances 
                             const a = haversine(origin, interLocations[0])
-                            const b = haversine(interLocations[1], destination)       
-                            const total = a + b;
+                            const b = haversine(interLocations[0], interLocations[1]);
+                            const c = haversine(interLocations[1], destination)       
+                            const total = (a + b) + (b+c);
                             const transformToKm = JSON.stringify(Math.round(total/100)/10);
-                            console.log(transformToKm);    
+                            console.log(transformToKm, '4');    
                             setUserDest({...userDest,['totalDistance']: transformToKm });
                             setIsCalculataing(true);
                         }        
@@ -172,10 +175,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                         setIsCalculataing(true);
                     }
 
-                    // const total = haversine(origin, destination);
-                    // const transformToKm = JSON.stringify(Math.round(total/100)/10);
-                    // setUserDest({...userDest,['totalDistance']: transformToKm });
-                    // setIsCalculataing(true);
+                   
                 }
             }
 
