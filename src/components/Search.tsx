@@ -24,6 +24,8 @@ const Search = ({userDest, setUserDest}:IProps) =>{
     const [calculateError, setCalculateError] = useState<boolean>(false);
     const [errorType, errorTypeSet] = useState<string>('');
     const [isDistance,setIsDistance] = useState<boolean>(false);
+    const [errorAnimaton,errorAnimation] = useState<boolean>(false);
+
     const [isCalculating, setIsCalculataing] = useState<boolean>(false)
     const [isReady, setIsReady] = useState<boolean>(false);
     const navigate = useNavigate();
@@ -121,108 +123,130 @@ const Search = ({userDest, setUserDest}:IProps) =>{
             e.preventDefault()
 
             if(userDest.cityOrigin=='Dijon'||userDest.cityDestination==='Dijon'){
-                setCalculateError(true);
+                // setCalculateError(true);
+                setError(true);
                 errorTypeSet('Dijon');
-            }
-
-            if(userDest.originLocation && userDest.destinationLocation){
-                if(userDest.originLocation.latitude && userDest.originLocation.longitude){
-                    const origin = {
-                        latitude:userDest.originLocation?.latitude, 
-                        longitude:userDest.originLocation?.longitude
-                    };
-                    const destination = {
-                        latitude:userDest.destinationLocation?.latitude, 
-                        longitude:userDest.destinationLocation?.longitude
-                    };
-                    const interLocations:any = userDest.cityIntermediate&&userDest.cityIntermediate?.length >= 1 ? [...userDest.cityIntermediate.map((item, index)=>{return{latitude:item.location?.latitude, longitude:item.location?.longitude}})]:null
-
-                   if(interLocations){
-                        if(interLocations.length === 1){
-                            // for 3 distances
-                            const a = haversine(origin, interLocations[0]);
-                            const b = haversine(interLocations[0], destination);
-                            const c = a + b;
-                            const total = (a+b) + (b+c); 
+                setIsCalculataing(true)
+            }else{    
+                if(userDest.originLocation && userDest.destinationLocation){
+                    if(userDest.originLocation.latitude && userDest.originLocation.longitude){
+                        const origin = {
+                            latitude:userDest.originLocation?.latitude, 
+                            longitude:userDest.originLocation?.longitude
+                        };
+                        const destination = {
+                            latitude:userDest.destinationLocation?.latitude, 
+                            longitude:userDest.destinationLocation?.longitude
+                        };
+                        const interLocations:any = userDest.cityIntermediate&&userDest.cityIntermediate?.length >= 1 ? [...userDest.cityIntermediate.map((item, index)=>{return{latitude:item.location?.latitude, longitude:item.location?.longitude}})]:null
+    
+                       if(interLocations){
+                            if(interLocations.length === 1){
+                                // for 3 distances
+                                const a = haversine(origin, interLocations[0]);
+                                const b = haversine(interLocations[0], destination);
+                                const c = a + b;
+                                const total = (a+b) + (b+c); 
+                                const transformToKm = JSON.stringify(Math.round(total/100)/10);
+                                setUserDest({...userDest,['totalDistance']: transformToKm });
+                                setIsCalculataing(true);
+                            };
+                            if( interLocations.length === 2){
+                                // for 4 distances 
+                                const a = haversine(origin, interLocations[0])
+                                const b = haversine(interLocations[0], interLocations[1]);
+                                const c = haversine(interLocations[1], destination)       
+                                const total = (a + b) + (b+c);
+                                const transformToKm = JSON.stringify(Math.round(total/100)/10);
+                                console.log(transformToKm, '4');    
+                                setUserDest({...userDest,['totalDistance']: transformToKm });
+                                setIsCalculataing(true);
+                            }        
+                            if( interLocations.length > 2 ){
+                                console.log('this is bigger than two. Deal with it.');
+    
+                                const startPoint = haversine(origin, interLocations[0]);
+                                const startMidCc  = haversine(interLocations[0], interLocations[1]);
+                                
+                                const lastElement = interLocations[interLocations.length - 1];
+                                const finalMidCc = haversine(interLocations[interLocations.length -2], lastElement);
+                                const finalDestiny = haversine(lastElement, destination);
+    
+                                let midvalueArr:any=[];
+                                let i=1;
+                                while(i < interLocations.length - 1){
+                                    let value = haversine(interLocations[i], interLocations[i+1])
+                                    midvalueArr.push(value)
+                                    i++;
+                                }
+                                
+                                let sumMidValue = midvalueArr.reduce((accumulator:any, value:any)=> accumulator + value,0)
+    
+                                console.log(sumMidValue, 'sumMidValue')
+                                let total = (startPoint + startMidCc) + (startMidCc + midvalueArr[0]) + sumMidValue + (midvalueArr[midvalueArr.length -1] + finalMidCc) + (finalMidCc + finalDestiny);
+                                const transformToKm = JSON.stringify(Math.round(total/100)/10);
+                            
+                                setUserDest({...userDest,['totalDistance']: transformToKm });
+                                setIsCalculataing(true);
+    
+                            }    
+                       }else{
+                            const total = haversine(origin, destination);
                             const transformToKm = JSON.stringify(Math.round(total/100)/10);
                             setUserDest({...userDest,['totalDistance']: transformToKm });
                             setIsCalculataing(true);
                         };
-                        if( interLocations.length === 2){
-                            // for 4 distances 
-                            const a = haversine(origin, interLocations[0])
-                            const b = haversine(interLocations[0], interLocations[1]);
-                            const c = haversine(interLocations[1], destination)       
-                            const total = (a + b) + (b+c);
-                            const transformToKm = JSON.stringify(Math.round(total/100)/10);
-                            console.log(transformToKm, '4');    
-                            setUserDest({...userDest,['totalDistance']: transformToKm });
-                            setIsCalculataing(true);
-                        }        
-                        if( interLocations.length > 2 ){
-                            console.log('this is bigger than two. Deal with it.');
-
-                            const startPoint = haversine(origin, interLocations[0]);
-                            const startMidCc  = haversine(interLocations[0], interLocations[1]);
-                            
-                            const lastElement = interLocations[interLocations.length - 1];
-                            const finalMidCc = haversine(interLocations[interLocations.length -2], lastElement);
-                            const finalDestiny = haversine(lastElement, destination);
-
-                            let midvalueArr:any=[];
-                            let i=1;
-                            while(i < interLocations.length - 1){
-                                let value = haversine(interLocations[i], interLocations[i+1])
-                                midvalueArr.push(value)
-                                i++;
-                            }
-                            
-                            let sumMidValue = midvalueArr.reduce((accumulator:any, value:any)=> accumulator + value,0)
-
-                            console.log(sumMidValue, 'sumMidValue')
-                            let total = (startPoint + startMidCc) + (startMidCc + midvalueArr[0]) + sumMidValue + (midvalueArr[midvalueArr.length -1] + finalMidCc) + (finalMidCc + finalDestiny);
-                            const transformToKm = JSON.stringify(Math.round(total/100)/10);
-                        
-                            setUserDest({...userDest,['totalDistance']: transformToKm });
-                            setIsCalculataing(true);
-
-                        }    
-                   }else{
-                        const total = haversine(origin, destination);
-                        const transformToKm = JSON.stringify(Math.round(total/100)/10);
-                        setUserDest({...userDest,['totalDistance']: transformToKm });
-                        setIsCalculataing(true);
-                    };
-
-                   
-                }
-            };
+    
+                       
+                    }
+                };
+                
+            }
             
     };
     if(isCalculating){
-        setTimeout(() => {
-            setIsDistance(true);
-            setIsCalculataing(false);
-            setIsReady(true);
-        }, 1900);
+        if(error && errorType == 'Dijon'){
+                setTimeout(() => {
+                    setIsCalculataing(false);
+                    setCalculateError(true)
+                }, 1900);    
+    
+        }else{
+            setTimeout(() => {
+                setIsDistance(true);
+                setIsCalculataing(false);
+                setIsReady(true);
+            }, 1900);
+        }
     };
 
+    if(calculateError){
+        setTimeout(()=>{
+            setCalculateError(false);
+        },1000)
+    }
+
     function HandleSubmit(e:any){
+
+        if(error && errorType=='Dijon' && !calculateError){
+            navigate("/")
+            console.log('hi')
+        }
         if(isReady){
-            // const params:any = {
-            //     originCity:userDest.cityOrigin,
-            //     originLoc:JSON.stringify(userDest.originLocation), 
-            //     destinationCity:userDest.cityDestination,
-            //     destinationLoc:JSON.stringify(userDest.destinationLocation),
-            //     cityIntermediate:JSON.stringify(userDest.cityIntermediate), 
-            //     passengerNumber:userDest.passengersNumber, 
-            //     date:userDest.date, 
-            //     totalDistance:userDest.totalDistance
-            // };
-            // navigate({
-            //     pathname:'/results',
-            //     search: `?${createSearchParams(params)}`
-            // });
+            const params:any = {
+                originCity:userDest.cityOrigin,
+                originLoc:JSON.stringify(userDest.originLocation), 
+                destinationCity:userDest.cityDestination,
+                destinationLoc:JSON.stringify(userDest.destinationLocation),
+                cityIntermediate:JSON.stringify(userDest.cityIntermediate), 
+                passengerNumber:userDest.passengersNumber, 
+                date:userDest.date, 
+                totalDistance:userDest.totalDistance
+            };
+            navigate({
+                pathname:'/results',
+                search: `?${createSearchParams(params)}`
+            });
             
             setIsCalculataing(true);
         } else { 
@@ -271,7 +295,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
         console.log(errorType);
     }
     console.log(calculateError);
-    
+
     return(
     <section className="w-full h-full flex items-center justify-center">            
            <form onSubmit={(e)=>{HandleSubmit(e)}} className="flex flex-col rounded-md p-3 gap-3 bg-white max-w-[30em] w-full h-[fit-content] "  >
@@ -424,13 +448,12 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                <div id="distanceContainer">
               
                 {
-                    isCalculating?(
+                    isCalculating || calculateError?(
                         <div className='w-full flex flex-col items-center'>
-                            <span>Calculating routes...</span>
+                            <span className={`${calculateError? 'text-red-500' : ''}`} >Calculating routes...</span>
                             <ClipLoader
-                                color="blue"
-                                loading={isCalculating}
-                            
+                                color={`${calculateError? 'red' : 'blue'}`}
+                                loading={calculateError}
                                 size={100}
                                 aria-label="Loading Spinner"
                                 data-testid="loader"
@@ -444,7 +467,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                     <div className='flex gap-2 ' >
 
                         <div>
-                            <label>Total distance to be traveld:</label>
+                            <label>Total distance to be traveld:  </label>
                             {
                                 userDest.totalDistance!=null ?(
                                     <span>{userDest.totalDistance} Km</span>
@@ -453,6 +476,16 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                         </div>
                     </div>
                 ):null}
+
+
+                {
+                   error && errorType=='Dijon' && !calculateError && !isCalculating ?(
+                        <div   className='w-[fit-content] mx-auto text-bold text-red-500' >
+                            <h3>Error when trying to calculate "Dijon" distance</h3>
+                        </div>
+                    ):null
+                }
+
                </div>
                
                <div id="submitForm" >
@@ -461,9 +494,10 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                         userDest.date&&
                         userDest.passengersNumber&&
                         userDest.passengersNumber !== '0'&& !isCalculating &&
-                        !error ? 'bg-blue-500 text-white': isCalculating ? 'bg-rose-500 text-white': 'bg-gray-300 cursor-not-allowed '} p-2 rounded-sm`}                       
+                        !error ? 'bg-blue-500 text-white': isCalculating ? 'bg-rose-500 text-white': error && errorType=='Dijon' && !calculateError ? 'bg-red-500 text-white': 'bg-gray-300 cursor-not-allowed '} p-2 rounded-sm`}                       
                         >
-                            {isCalculating? "Calculating route..." : isReady? "Ready!" : "Calculate Route"}
+                            {isCalculating ? "Calculating route..." : isReady? "Submit!" : error && errorType=='Dijon' && !calculateError ? 'try it again': "Calculate Route"}
+                           
                         </button>
                </div>
            </form>
