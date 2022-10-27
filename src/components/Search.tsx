@@ -17,18 +17,15 @@ type IProps = {
 
 
 const Search = ({userDest, setUserDest}:IProps) =>{
-    console.log(userDest);
     const [cities, citiesSet] =  useState([] as any);
     const [searchOrigin, setSearchOrigin] = useState<string>('');
     const [searchDestin, setSearchDestin] = useState<string>('')
     const [startDate, setStartDate] = useState(new Date());
 
-
     const [error, setError] = useState<boolean>(false);
     const [calculateError, setCalculateError] = useState<boolean>(false);
     const [errorType, errorTypeSet] = useState<string>('');
     const [isDistance,setIsDistance] = useState<boolean>(false);
-    const [errorAnimaton,errorAnimation] = useState<boolean>(false);
 
     const [isCalculating, setIsCalculataing] = useState<boolean>(false)
     const [isReady, setIsReady] = useState<boolean>(false);
