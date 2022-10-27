@@ -14,7 +14,7 @@ const Results =({state}:DestinyProp)=>{
     const [interDes, setInterDes] = useState<any>()
     const [totalDistance, setTotalDistance]=useState<string>()
     const [cityData, setCityData]=useState<any>()
-    const [urlData, setUrlData] = useState<any>()
+    const [urlData, setUrlData] = useState<any>({})
     const [isUrl, setIsUrl] = useState<boolean>(false);
     const [isCalculating ,setIsCalculataing] = useState<boolean>(false);
     const [calculated, setCalculated] = useState<boolean>(false);
@@ -23,10 +23,9 @@ const Results =({state}:DestinyProp)=>{
 
     let date;
 
-    console.log(totalDistance);
-
-    useEffect(()=>{                
-        if(Object.keys(state).length ===0){
+    useEffect(()=>{
+        
+        if(Object.keys(urlData).length== 0){
             let searchData = {
                 origin:searchParams?.get('originCity'),
                 originLoc:searchParams?.get('originLoc'),
@@ -37,20 +36,23 @@ const Results =({state}:DestinyProp)=>{
                 date: searchParams?.get('date'),
                 total:searchParams?.get('totalDistance')  
             }
-            setIsUrl(true);
             setUrlData({...searchData});
+            setIsUrl(true);
         }else
          if(Object.keys(state).length > 0){
             setCityData(state)
         }
         else { 
+            console.log('hi')
             navigate('/');
         }
     },[]);
 
     useEffect(()=>{
-        if(isUrl&&urlData?.intermediateCities) 
-            setInterDes(JSON.parse(urlData.intermediateCities)); 
+        if( isUrl)
+            if(urlData.intermediateCities&&urlData.intermediateCities.length >= 1){
+                setInterDes(JSON.parse(urlData.intermediateCities)); 
+            } 
             CalculateDestination();
     },[urlData])
     useEffect(()=>{
@@ -70,25 +72,37 @@ const Results =({state}:DestinyProp)=>{
         date = new Date(urlData.date)
     };
     
-    // CalculateDestination()
+
 
     function CalculateDestination(){
         let calcData=null;
-        if(urlData&&urlData.intermediateCities){
-            let inter = JSON.parse(urlData?.intermediateCities)
+        if( urlData){
+            console.log('url',urlData)
+            let  inter,origin,end = null
+            if(urlData.intermediateCities && urlData.intermediateCities.length >=1){
+                inter = JSON.parse(urlData.intermediateCities);
+            }
+            if(urlData.originLoc){
+                origin =JSON.parse(urlData?.originLoc);
+            }
+            if(urlData.destinationLoc) end = JSON.parse(urlData?.destinationLoc)
             calcData={
-                originLocation:JSON.parse(urlData?.originLoc),
-                destinationLocation:JSON.parse(urlData?.destinationLoc),
+                originLocation:origin,
+                destinationLocation:end,
                 cityIntermediate: inter
             }
-        } else
-         calcData = {
-            originLocation:cityData?.originLocation,
-            destinationLocation:cityData?.destinationLocation,
-            cityIntermediate: cityData?.cityIntermediate
+            
+            console.log('hi')
+        } else{
+            calcData = {
+               originLocation:cityData?.originLocation,
+               destinationLocation:cityData?.destinationLocation,
+               cityIntermediate: cityData?.cityIntermediate
+           }
+
         }
         
-        console.log(calcData)
+        // console.log(calcData)
         
         if(calcData){
             if(calcData.originLocation && calcData.destinationLocation){
@@ -178,6 +192,8 @@ if(isCalculating){
         setCalculated(true)
     },1900)
 }
+
+console.log(urlData)
 
     
     return(
