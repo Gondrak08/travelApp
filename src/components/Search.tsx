@@ -21,8 +21,8 @@ const Search = ({userDest, setUserDest}:IProps) =>{
     const [cities, citiesSet] =  useState([] as any);
     const [startDate, setStartDate] = useState(new Date());
     const [error, setError] = useState<boolean>(false);
+    const [calculateError, setCalculateError] = useState<boolean>(false);
     const [errorType, errorTypeSet] = useState<string>('');
-    
     const [isDistance,setIsDistance] = useState<boolean>(false);
     const [isCalculating, setIsCalculataing] = useState<boolean>(false)
     const [isReady, setIsReady] = useState<boolean>(false);
@@ -120,8 +120,9 @@ const Search = ({userDest, setUserDest}:IProps) =>{
     function CalculateDestination(e:any){
             e.preventDefault()
 
-            if(userDest.cityOrigin||userDest.cityDestination){
-                
+            if(userDest.cityOrigin=='Dijon'||userDest.cityDestination==='Dijon'){
+                setCalculateError(true);
+                errorTypeSet('Dijon');
             }
 
             if(userDest.originLocation && userDest.destinationLocation){
@@ -208,20 +209,20 @@ const Search = ({userDest, setUserDest}:IProps) =>{
 
     function HandleSubmit(e:any){
         if(isReady){
-            const params:any = {
-                originCity:userDest.cityOrigin,
-                originLoc:JSON.stringify(userDest.originLocation), 
-                destinationCity:userDest.cityDestination,
-                destinationLoc:JSON.stringify(userDest.destinationLocation),
-                cityIntermediate:JSON.stringify(userDest.cityIntermediate), 
-                passengerNumber:userDest.passengersNumber, 
-                date:userDest.date, 
-                totalDistance:userDest.totalDistance
-            };
-            navigate({
-                pathname:'/results',
-                search: `?${createSearchParams(params)}`
-            });
+            // const params:any = {
+            //     originCity:userDest.cityOrigin,
+            //     originLoc:JSON.stringify(userDest.originLocation), 
+            //     destinationCity:userDest.cityDestination,
+            //     destinationLoc:JSON.stringify(userDest.destinationLocation),
+            //     cityIntermediate:JSON.stringify(userDest.cityIntermediate), 
+            //     passengerNumber:userDest.passengersNumber, 
+            //     date:userDest.date, 
+            //     totalDistance:userDest.totalDistance
+            // };
+            // navigate({
+            //     pathname:'/results',
+            //     search: `?${createSearchParams(params)}`
+            // });
             
             setIsCalculataing(true);
         } else { 
@@ -266,6 +267,11 @@ const Search = ({userDest, setUserDest}:IProps) =>{
         e.preventDefault();
     };
 
+    if(calculateError){
+        console.log(errorType);
+    }
+    console.log(calculateError);
+    
     return(
     <section className="w-full h-full flex items-center justify-center">            
            <form onSubmit={(e)=>{HandleSubmit(e)}} className="flex flex-col rounded-md p-3 gap-3 bg-white max-w-[30em] w-full h-[fit-content] "  >

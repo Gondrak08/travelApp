@@ -86,7 +86,6 @@ const Results =({state}:DestinyProp)=>{
                 })]:null;
 
                
-
                if(interLocations){
                     if(interLocations.length === 1){
                         // for 3 distances
