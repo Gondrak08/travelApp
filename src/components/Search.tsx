@@ -95,7 +95,6 @@ const Search = ({userDest, setUserDest}:IProps) =>{
             });
             
         } 
-
         
     };
 
@@ -239,6 +238,8 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                     userDest.passengersNumber !== '0'
                     ){
                         CalculateDestination(e);
+                        setError(false);
+                        errorTypeSet('');
                     }else{
                         if(!userDest.cityOrigin){
                             setError(true);

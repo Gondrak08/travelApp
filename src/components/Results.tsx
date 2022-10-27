@@ -21,6 +21,8 @@ const Results =({state}:DestinyProp)=>{
 
     let date;
 
+    console.log(totalDistance);
+
     useEffect(()=>{                
         if(Object.keys(state).length ===0){
             let searchData = {
@@ -47,6 +49,7 @@ const Results =({state}:DestinyProp)=>{
     useEffect(()=>{
         if(isUrl&&urlData?.intermediateCities) 
             setInterDes(JSON.parse(urlData.intermediateCities)); 
+            CalculateDestination();
     },[urlData])
     useEffect(()=>{
         if(cityData?.cityIntermediate)
@@ -65,23 +68,39 @@ const Results =({state}:DestinyProp)=>{
         date = new Date(urlData.date)
     };
     
-
+    // CalculateDestination()
 
     function CalculateDestination(){
-        // e.preventDefault()
-        if(cityData){
-            if(cityData.originLocation && cityData.destinationLocation){
-                if(cityData.originLocation.latitude && cityData.originLocation.longitude){
+        let calcData=null;
+        if(urlData&&urlData.intermediateCities){
+            let inter = JSON.parse(urlData?.intermediateCities)
+            calcData={
+                originLocation:JSON.parse(urlData?.originLoc),
+                destinationLocation:JSON.parse(urlData?.destinationLoc),
+                cityIntermediate: inter
+            }
+        } else
+         calcData = {
+            originLocation:cityData?.originLocation,
+            destinationLocation:cityData?.destinationLocation,
+            cityIntermediate: cityData?.cityIntermediate
+        }
+        
+        console.log(calcData)
+        
+        if(calcData){
+            if(calcData.originLocation && calcData.destinationLocation){
+                if(calcData.originLocation.latitude && calcData.originLocation.longitude){
                 
                 const origin = {
-                    latitude:cityData.originLocation?.latitude, 
-                    longitude:cityData.originLocation?.longitude
+                    latitude:calcData.originLocation?.latitude, 
+                    longitude:calcData.originLocation?.longitude
                 };
                 const destination = {
-                    latitude:cityData.destinationLocation?.latitude, 
-                    longitude:cityData.destinationLocation?.longitude
+                    latitude:calcData.destinationLocation?.latitude, 
+                    longitude:calcData.destinationLocation?.longitude
                 };
-                const interLocations:any = cityData.cityIntermediate&&cityData.cityIntermediate?.length >= 1 ? [...cityData.cityIntermediate.map((item:any, index:number)=>{
+                const interLocations:any = calcData.cityIntermediate&&calcData.cityIntermediate?.length >= 1 ? [...calcData.cityIntermediate.map((item:any, index:number)=>{
                     return{latitude:item.location?.latitude, longitude:item.location?.longitude};
                 })]:null;
 
@@ -110,6 +129,7 @@ const Results =({state}:DestinyProp)=>{
                     }        
                     if( interLocations.length > 2 ){
                        
+
                         const startPoint = haversine(origin, interLocations[0]);
                         const startMidCc  = haversine(interLocations[0], interLocations[1]);
                         
@@ -130,6 +150,10 @@ const Results =({state}:DestinyProp)=>{
                         console.log(sumMidValue, 'sumMidValue')
                         let total = (startPoint + startMidCc) + (startMidCc + midvalueArr[0]) + sumMidValue + (midvalueArr[midvalueArr.length -1] + finalMidCc) + (finalMidCc + finalDestiny);
                         const transformToKm = JSON.stringify(Math.round(total/100)/10);
+                    
+                        setTotalDistance(transformToKm);
+                        setIsCalculataing(true);
+
 
                     }    
                }else{
@@ -218,7 +242,7 @@ console.log(totalDistance);
                             <label>
                                 Total distance:
                             </label>
-                            <span> {isUrl ? urlData.total : state.totalDistance} km </span>       
+                            <span> { totalDistance } km </span>       
                         </div>
                     </div>
                 </div>
