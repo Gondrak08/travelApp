@@ -120,6 +120,10 @@ const Search = ({userDest, setUserDest}:IProps) =>{
     function CalculateDestination(e:any){
             e.preventDefault()
 
+            if(userDest.cityOrigin||userDest.cityDestination){
+                
+            }
+
             if(userDest.originLocation && userDest.destinationLocation){
                 if(userDest.originLocation.latitude && userDest.originLocation.longitude){
                     const origin = {
@@ -156,6 +160,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                         }        
                         if( interLocations.length > 2 ){
                             console.log('this is bigger than two. Deal with it.');
+
                             const startPoint = haversine(origin, interLocations[0]);
                             const startMidCc  = haversine(interLocations[0], interLocations[1]);
                             
@@ -170,17 +175,14 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                 midvalueArr.push(value)
                                 i++;
                             }
-                            console.log(midvalueArr, "midvalueArr");
                             
                             let sumMidValue = midvalueArr.reduce((accumulator:any, value:any)=> accumulator + value,0)
 
                             console.log(sumMidValue, 'sumMidValue')
                             let total = (startPoint + startMidCc) + (startMidCc + midvalueArr[0]) + sumMidValue + (midvalueArr[midvalueArr.length -1] + finalMidCc) + (finalMidCc + finalDestiny);
                             const transformToKm = JSON.stringify(Math.round(total/100)/10);
-                            console.log(transformToKm, 'ToKm')
+                        
                             setUserDest({...userDest,['totalDistance']: transformToKm });
-
-                    
                             setIsCalculataing(true);
 
                         }    
@@ -189,11 +191,11 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                         const transformToKm = JSON.stringify(Math.round(total/100)/10);
                         setUserDest({...userDest,['totalDistance']: transformToKm });
                         setIsCalculataing(true);
-                    }
+                    };
 
                    
                 }
-            }
+            };
             
     };
     if(isCalculating){
@@ -206,20 +208,20 @@ const Search = ({userDest, setUserDest}:IProps) =>{
 
     function HandleSubmit(e:any){
         if(isReady){
-            // const params:any = {
-            //     originCity:userDest.cityOrigin,
-            //     originLoc:JSON.stringify(userDest.originLocation), 
-            //     destinationCity:userDest.cityDestination,
-            //     destinationLoc:JSON.stringify(userDest.destinationLocation),
-            //     cityIntermediate:JSON.stringify(userDest.cityIntermediate), 
-            //     passengerNumber:userDest.passengersNumber, 
-            //     date:userDest.date, 
-            //     totalDistance:userDest.totalDistance
-            // };
-            // navigate({
-            //     pathname:'/results',
-            //     search: `?${createSearchParams(params)}`
-            // });
+            const params:any = {
+                originCity:userDest.cityOrigin,
+                originLoc:JSON.stringify(userDest.originLocation), 
+                destinationCity:userDest.cityDestination,
+                destinationLoc:JSON.stringify(userDest.destinationLocation),
+                cityIntermediate:JSON.stringify(userDest.cityIntermediate), 
+                passengerNumber:userDest.passengersNumber, 
+                date:userDest.date, 
+                totalDistance:userDest.totalDistance
+            };
+            navigate({
+                pathname:'/results',
+                search: `?${createSearchParams(params)}`
+            });
             
             setIsCalculataing(true);
         } else { 
