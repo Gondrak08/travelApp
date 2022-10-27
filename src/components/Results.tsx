@@ -195,7 +195,7 @@ console.log(totalDistance);
 
                         {
                             interDes?.length >= 1? (
-                                <div className='flex gap-3 w-full h-full' >
+                                <div className='grid grid-cols-3 gap-3 w-full h-full' >
                                 
                                 {interDes.map((item:any, index:number)=>(
                                     <>

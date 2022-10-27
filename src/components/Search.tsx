@@ -90,49 +90,12 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                 }
             );
         }else {
-            // console.log(keyName)
             setUserDest(state=>{
                 return {...state,[e.target.id]: e.target.value}
             });
-            if(e.target.id === 'cityOrigin'|| e.target.id === 'cityDestination'){
-                const location = cities.filter((value:any,key:number)=>{
-                    if(e.target.value === value[0]) return [...value]
-                });
-                if(e.target.id==='cityOrigin') setUserDest((state)=>{return{...state, ['originLocation']:{'latitude':location[0][1], 'longitude':location[0][2]}}});
-
-                if(e.target.id==='cityDestination') setUserDest((state)=>{return{...state, ['destinationLocation']:{'latitude':location[0][1], 'longitude':location[0][2]}}});    
-            }
+            
         } 
 
-        // calculating total Destination
-        // if(e.target.id === 'cityOrigin'||
-        // e.target.id === 'cityDestination'){
-        //     const keyName = e.target.value;
-        //     const item = cities.filter((value:any,key:number)=>{
-        //         if(keyName === value[0]) return [...value]
-        //     })
-        //     if(e.target.id === 'cityOrigin'){
-        //         setFromLocation((state:any)=>{
-        //             state['latitude'] = item[0][1];
-        //             state['longitude'] = item[0][2];
-        //             return({...state});
-        //         });
-        //     };
-        //     if(e.target.id === 'cityDestination'){
-        //         setToLocation((state:any)=>{
-        //             state['latitude'] = item[0][1];
-        //             state['longitude'] = item[0][2];
-        //             return({...state});
-        //         });
-        //     };
-        //     // if(e.target.id==='cityIntermediate'){
-        //     //     setIntermedLocation((state:any)=>{
-        //     //         state['latitude'] = item[0][1];
-        //     //         state['longitude'] = item[0][2];
-        //     //         return({...state});
-        //     //     })
-        //     // }
-        // };
         
     };
 
@@ -387,14 +350,6 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                     </div>
                                 </div>
 
-                                {/* <select id="cityOrigin" 
-                                className={`${error&&errorType==='similarCity'||error&&errorType==='global'||error&&errorType==='cityOrigin'||error&&errorType==='originSimilarToInterCity'?'border-[1px] border-rose-500 ':''} w-full p-3`} onChange={(e)=>{handleDestination(e, 0)}} >
-                                    <option>City of origin</option>
-                                    {cities && cities.map((item:[string], index:number)=>(
-                                        <option key={index} >{item[0]}</option>
-                                    ))}
-                                </select> */}
-
 
                             </div>
                             <div className='flex w-full flex-col' >
@@ -405,51 +360,47 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                         <span className='text-red-500 text-[8]'>Destination cannot be similar to a intermediate city</span>
                                     ):null}
 
-                            <div className='w-full relative'>
-                                    {
-                                        userDest.cityDestination&&(
-                                            <button 
-                                            className='text-[14px] absolute top-[-10px] right-[-5px] bg-gray-400 hover:bg-black hover:text-white rounded-full w-[1.5em] h-[1.5em]'
-                                            onClick={(e)=>{
-                                                setUserDest((state:any)=>{
-                                                return{...state,['cityDestination']:null}
-                                                setSearchDestin('');
-                                            })}}
-                                            >X</button>
-                                        )
-                                    }
-                                    <input type="text"
-                                    value={userDest?.cityDestination}
-                                    disabled={userDest.cityDestination?true:false}
-                                    placeholder='Chose your city of origin' 
-                                    className={`${error&&errorType==='similarCity' ||  error&&errorType==='global'||error&&errorType==='cityDestination'||error&&errorType==='destinationSimilarToInterCity' ?'border-[1px] border-rose-500 ':''} border border-[1px] border-black w-full p-3`} 
-                                    onChange={(e)=>{ setSearchDestin(e.target.value)  }}
-                                    />
-                                    <div id="result" className='absolute bg-blue-300 w-full z-50' >
+                                <div className='w-full relative'>
                                         {
-                                            !userDest.cityDestination && (
-                                                cities && cities.filter((item:[string], index:number)=>{
-                                                    if(searchDestin === ''){
-                                                        return null
-                                                    } else if(item[0].toLowerCase().includes(searchDestin.toLocaleLowerCase())) {
-                                                        return item[0]
-                                                    }
-                                                }).map((item:[string], index:number)=>(
-                                                    <div onClick={(e)=> onSelect(e,item,'cityDestination', index)} key={index} className='cursor-pointer hover:bg-black hover:bg-opacity-10 p-2'>
-                                                        <span>{item[0]}</span>
-                                                    </div>
-                                                ))
+                                            userDest.cityDestination&&(
+                                                <button 
+                                                className='text-[14px] absolute top-[-10px] right-[-5px] bg-gray-400 hover:bg-black hover:text-white rounded-full w-[1.5em] h-[1.5em]'
+                                                onClick={(e)=>{
+                                                    setUserDest((state:any)=>{
+                                                    return{...state,['cityDestination']:null}
+                                                    setSearchDestin('');
+                                                })}}
+                                                >X</button>
                                             )
                                         }
-                                    </div>   
+                                        <input type="text"
+                                        value={userDest?.cityDestination}
+                                        disabled={userDest.cityDestination?true:false}
+                                        placeholder='Chose your city of origin' 
+                                        className={`${error&&errorType==='similarCity' ||  error&&errorType==='global'||error&&errorType==='cityDestination'||error&&errorType==='destinationSimilarToInterCity' ?'border-[1px] border-rose-500 ':''} border border-[1px] border-black w-full p-3`} 
+                                        onChange={(e)=>{ setSearchDestin(e.target.value)  }}
+                                        />
+                                        <div id="result" className='absolute bg-blue-300 w-full z-50' >
+                                            {
+                                                !userDest.cityDestination && (
+                                                    cities && cities.filter((item:[string], index:number)=>{
+                                                        if(searchDestin === ''){
+                                                            return null
+                                                        } else if(item[0].toLowerCase().includes(searchDestin.toLocaleLowerCase())) {
+                                                            return item[0]
+                                                        }
+                                                    }).map((item:[string], index:number)=>(
+                                                        <div onClick={(e)=> onSelect(e,item,'cityDestination', index)} key={index} className='cursor-pointer hover:bg-black hover:bg-opacity-10 p-2'>
+                                                            <span>{item[0]}</span>
+                                                        </div>
+                                                    ))
+                                                )
+                                            }
+                                        </div>   
+                                
                                 </div>
 
-                                {/* <select id="cityDestination" className={`${error&&errorType==='similarCity' ||  error&&errorType==='global'||error&&errorType==='cityDestination'||error&&errorType==='destinationSimilarToInterCity' ?'border-[1px] border-rose-500 ':''} w-full p-3`} onChange={(e)=>{handleDestination(e,'cityDestination', 0)}} >
-                                    <option>City of destination</option>
-                                    {cities && cities.map((item:[string], index:number)=>(
-                                        <option key={index} >{item[0]}</option>
-                                        ))}
-                                </select> */}
+                                
                             </div>
                         </div>
 
@@ -483,6 +434,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                     <span className='text-red-500' >Intermerdiate City cannot be send empty
                                     </span>
                                 ) :null}
+
 
                                 <div className='grid grid-cols-3 gap-3 w-full'>
                                     {
