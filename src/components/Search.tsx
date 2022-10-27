@@ -273,7 +273,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
     }
 
     
-    // console.log(calculateError);
+    console.log(error, errorType);
 
     return(
     <section className="w-full h-full flex items-center justify-center">            
@@ -323,7 +323,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                     value={userDest?.cityOrigin}
                                     disabled={userDest.cityOrigin?true:false}
                                     placeholder='Chose your city of origin' 
-                                    className={`${error&&errorType==='similarCity'||error&&errorType==='global'||error&&errorType==='cityOrigin'||error&&errorType==='originSimilarToInterCity'?'border-[1px] border-rose-500 ':''} border border-[1px] border-black w-full p-3`} 
+                                    className={`${error&&errorType==='finalOrigin'||error&&errorType==='similarCity'||error&&errorType==='global'||error&&errorType==='cityOrigin'||error&&errorType==='originSimilarToInterCity'?'border-[1px] border-rose-500 ':'border border-[1px] border-black'} active:border-0  w-full p-3`} 
                                     onChange={(e)=>{ setSearchOrigin(e.target.value)  }}
                                     />
 
@@ -332,8 +332,19 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                             !userDest.cityOrigin && (
                                                 cities && cities.filter((item:[string], index:number)=>{
                                                     if(searchOrigin === ''){
+                                                        if(error&&errorType=='failOrigin'){
+                                                            setError(false)
+                                                            errorTypeSet('')
+                                                        }
                                                         return null
-                                                    } else if(item[0].toLowerCase().includes(searchOrigin.toLocaleLowerCase())) {
+                                                    } else if(searchOrigin.toLocaleLowerCase() == 'fail' ){
+                                                        if(!error){
+                                                            setError(true)
+                                                            errorTypeSet('failOrigin')
+                                                        }
+                                                        // return  ;
+                                                    } 
+                                                    else if(item[0].toLowerCase().includes(searchOrigin.toLocaleLowerCase())) {
                                                         return item[0]
                                                     }
                                                 }).map((item:[string], index:number)=>(
@@ -343,6 +354,15 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                                 ))
                                             )
                                         }
+
+                                        {
+                                            error&&errorType=="failOrigin"?(
+                                                <div className='text-red-500 bg-gray-300 border border-rose-500 p-2'>
+                                                    <span>error during search....</span>
+                                                </div>
+                                            ):null
+                                        }
+
                                     </div>
                                 </div>
 
@@ -381,8 +401,19 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                                 !userDest.cityDestination && (
                                                     cities && cities.filter((item:[string], index:number)=>{
                                                         if(searchDestin === ''){
+                                                            if(error&&errorType=='failDes'){
+                                                                setError(false)
+                                                                errorTypeSet('');
+                                                            }
                                                             return null
-                                                        } else if(item[0].toLowerCase().includes(searchDestin.toLocaleLowerCase())) {
+                                                        } else if(searchDestin.toLocaleLowerCase()=='fail'){
+                                                            if(!error){
+                                                                setError(true)
+                                                                errorTypeSet('failDes');
+                                                            }
+                                                            // return ;
+                                                        } 
+                                                        else if(item[0].toLowerCase().includes(searchDestin.toLocaleLowerCase())) {
                                                             return item[0]
                                                         }
                                                     }).map((item:[string], index:number)=>(
@@ -391,6 +422,13 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                                         </div>
                                                     ))
                                                 )
+                                            }
+                                            {
+                                                error&&errorType=="failDes"?(
+                                                    <div className='text-red-500 bg-gray-300 border border-rose-500 p-2'>
+                                                        <span>error during search....</span>
+                                                    </div>
+                                                ):null
                                             }
                                         </div>   
                                 
