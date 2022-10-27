@@ -17,9 +17,13 @@ type IProps = {
 
 
 const Search = ({userDest, setUserDest}:IProps) =>{
-    // console.log(userDest.destinationLocation?.latitude);
+    console.log(userDest);
     const [cities, citiesSet] =  useState([] as any);
+    const [searchOrigin, setSearchOrigin] = useState<string>('');
+    const [searchDestin, setSearchDestin] = useState<string>('')
     const [startDate, setStartDate] = useState(new Date());
+
+
     const [error, setError] = useState<boolean>(false);
     const [calculateError, setCalculateError] = useState<boolean>(false);
     const [errorType, errorTypeSet] = useState<string>('');
@@ -58,7 +62,18 @@ const Search = ({userDest, setUserDest}:IProps) =>{
             }
         }
     },[userDest]);
-    function handleDestination(e:any,index:any){
+    
+    
+    
+    function onSelect(e:any, item:any, keyName:string, index:number){
+        setUserDest((state)=>{
+            return{...state,[keyName]:item[0]}
+        })
+        if(keyName==='cityOrigin') setUserDest((state)=>{return{...state, ['originLocation']:{'latitude':item[1], 'longitude':item[2]}}});
+        if(keyName==='cityDestination') setUserDest((state)=>{return{...state, ['destinationLocation']:{'latitude':item[1], 'longitude':item[2]}}});
+    }
+
+    function handleDestination(e:any,keyName:string, index:number){
         // select values
         if(e.target.id === 'cityIntermediate'){
             setUserDest(state=>{
@@ -75,6 +90,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                 }
             );
         }else {
+            // console.log(keyName)
             setUserDest(state=>{
                 return {...state,[e.target.id]: e.target.value}
             });
@@ -119,6 +135,8 @@ const Search = ({userDest, setUserDest}:IProps) =>{
         // };
         
     };
+
+
     function CalculateDestination(e:any){
             e.preventDefault()
 
@@ -294,7 +312,9 @@ const Search = ({userDest, setUserDest}:IProps) =>{
     if(calculateError){
         console.log(errorType);
     }
-    console.log(calculateError);
+
+    
+    // console.log(calculateError);
 
     return(
     <section className="w-full h-full flex items-center justify-center">            
@@ -327,27 +347,109 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                 ):error&&errorType==='originSimilarToInterCity'?(
                                     <span className='text-red-500 text-[8]'>Origin cannot be similar to intermediate city</span>
                                 ) :null}
-                                <select id="cityOrigin" 
+
+                                
+                                <div className='relative w-full' >
+                                    {
+                                        userDest.cityOrigin&&(
+                                            <button 
+                                            className='text-[14px] absolute top-[-10px] right-[-5px] bg-gray-400 hover:bg-black hover:text-white rounded-full w-[1.5em] h-[1.5em]'
+                                            onClick={(e)=>{setUserDest((state:any)=>{
+                                                return{...state,['cityOrigin']:null}
+                                            })}}
+                                            >X</button>
+                                        )
+                                    }
+                                    <input type="text"
+                                    value={userDest?.cityOrigin}
+                                    disabled={userDest.cityOrigin?true:false}
+                                    placeholder='Chose your city of origin' 
+                                    className={`${error&&errorType==='similarCity'||error&&errorType==='global'||error&&errorType==='cityOrigin'||error&&errorType==='originSimilarToInterCity'?'border-[1px] border-rose-500 ':''} border border-[1px] border-black w-full p-3`} 
+                                    onChange={(e)=>{ setSearchOrigin(e.target.value)  }}
+                                    />
+
+                                    <div id="result" className='absolute bg-blue-300 w-full z-50' >
+                                        {
+                                            !userDest.cityOrigin && (
+                                                cities && cities.filter((item:[string], index:number)=>{
+                                                    if(searchOrigin === ''){
+                                                        return null
+                                                    } else if(item[0].toLowerCase().includes(searchOrigin.toLocaleLowerCase())) {
+                                                        return item[0]
+                                                    }
+                                                }).map((item:[string], index:number)=>(
+                                                    <div onClick={(e)=> onSelect(e,item,'cityOrigin', index)} key={index} className='cursor-pointer hover:bg-black hover:bg-opacity-10 p-2'>
+                                                        <span>{item[0]}</span>
+                                                    </div>
+                                                ))
+                                            )
+                                        }
+                                    </div>
+                                </div>
+
+                                {/* <select id="cityOrigin" 
                                 className={`${error&&errorType==='similarCity'||error&&errorType==='global'||error&&errorType==='cityOrigin'||error&&errorType==='originSimilarToInterCity'?'border-[1px] border-rose-500 ':''} w-full p-3`} onChange={(e)=>{handleDestination(e, 0)}} >
                                     <option>City of origin</option>
                                     {cities && cities.map((item:[string], index:number)=>(
                                         <option key={index} >{item[0]}</option>
                                     ))}
-                                </select>
+                                </select> */}
+
+
                             </div>
                             <div className='flex w-full flex-col' >
-                                <label>To:*</label>
-                                {error&&errorType==='cityDestination'?(
-                                     <span className='text-red-500 text-[8]'>Select a destination</span>
-                                ):error&&errorType==='destinationSimilarToInterCity' ? (
-                                    <span className='text-red-500 text-[8]'>Destination cannot be similar to a intermediate city</span>
-                                ):null}
-                                <select id="cityDestination" className={`${error&&errorType==='similarCity' ||  error&&errorType==='global'||error&&errorType==='cityDestination'||error&&errorType==='destinationSimilarToInterCity' ?'border-[1px] border-rose-500 ':''} w-full p-3`} onChange={(e)=>{handleDestination(e, 0)}} >
+                                    <label>To:*</label>
+                                    {error&&errorType==='cityDestination'?(
+                                        <span className='text-red-500 text-[8]'>Select a destination</span>
+                                    ):error&&errorType==='destinationSimilarToInterCity' ? (
+                                        <span className='text-red-500 text-[8]'>Destination cannot be similar to a intermediate city</span>
+                                    ):null}
+
+                            <div className='w-full relative'>
+                                    {
+                                        userDest.cityDestination&&(
+                                            <button 
+                                            className='text-[14px] absolute top-[-10px] right-[-5px] bg-gray-400 hover:bg-black hover:text-white rounded-full w-[1.5em] h-[1.5em]'
+                                            onClick={(e)=>{
+                                                setUserDest((state:any)=>{
+                                                return{...state,['cityDestination']:null}
+                                                setSearchDestin('');
+                                            })}}
+                                            >X</button>
+                                        )
+                                    }
+                                    <input type="text"
+                                    value={userDest?.cityDestination}
+                                    disabled={userDest.cityDestination?true:false}
+                                    placeholder='Chose your city of origin' 
+                                    className={`${error&&errorType==='similarCity' ||  error&&errorType==='global'||error&&errorType==='cityDestination'||error&&errorType==='destinationSimilarToInterCity' ?'border-[1px] border-rose-500 ':''} border border-[1px] border-black w-full p-3`} 
+                                    onChange={(e)=>{ setSearchDestin(e.target.value)  }}
+                                    />
+                                    <div id="result" className='absolute bg-blue-300 w-full z-50' >
+                                        {
+                                            !userDest.cityDestination && (
+                                                cities && cities.filter((item:[string], index:number)=>{
+                                                    if(searchDestin === ''){
+                                                        return null
+                                                    } else if(item[0].toLowerCase().includes(searchDestin.toLocaleLowerCase())) {
+                                                        return item[0]
+                                                    }
+                                                }).map((item:[string], index:number)=>(
+                                                    <div onClick={(e)=> onSelect(e,item,'cityDestination', index)} key={index} className='cursor-pointer hover:bg-black hover:bg-opacity-10 p-2'>
+                                                        <span>{item[0]}</span>
+                                                    </div>
+                                                ))
+                                            )
+                                        }
+                                    </div>   
+                                </div>
+
+                                {/* <select id="cityDestination" className={`${error&&errorType==='similarCity' ||  error&&errorType==='global'||error&&errorType==='cityDestination'||error&&errorType==='destinationSimilarToInterCity' ?'border-[1px] border-rose-500 ':''} w-full p-3`} onChange={(e)=>{handleDestination(e,'cityDestination', 0)}} >
                                     <option>City of destination</option>
                                     {cities && cities.map((item:[string], index:number)=>(
                                         <option key={index} >{item[0]}</option>
                                         ))}
-                                </select>
+                                </select> */}
                             </div>
                         </div>
 
@@ -398,7 +500,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                             }}/>
                                             <select id="cityIntermediate" key={item} className={`${error&&errorType==='interCity'||error&&errorType==='originSimilarToInterCity'||error&&errorType==='destinationSimilarToInterCity'?'border-[1px] border-rose-500 ':''} w-full p-3`} 
                                             value={item.city}
-                                            onChange={(e)=>{handleDestination(e, index)}} >
+                                            onChange={(e)=>{handleDestination(e, 'cityIntermediate' ,index)}} >
                                                     <option>select a city</option>
                                                     {cities && cities.map((item:[string], key:number)=>(
                                                         <>
@@ -441,7 +543,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                 <span className='text-[12px] text-red-500' >You must select a number greater than 0</span>
                             ):null
                         }
-                        <input  id="passengersNumber" type="number" min="0" placeholder='0' className={` ${ error&&errorType==='numberError'|| error&&errorType==='global' ? 'border-[1px] border-rose-500 ':'w-[12em] ' } bg-gray-200 p-2`} onChange={(e)=>{handleDestination(e, 0)}} />
+                        <input  id="passengersNumber" type="number" min="0" placeholder='0' className={` ${ error&&errorType==='numberError'|| error&&errorType==='global' ? 'border-[1px] border-rose-500 ':'w-[12em] ' } bg-gray-200 p-2`} onChange={(e)=>{handleDestination(e, "passengersNumber",0)}} />
                     </div>
                </div>
 
