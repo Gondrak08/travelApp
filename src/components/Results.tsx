@@ -179,9 +179,6 @@ if(isCalculating){
     },1900)
 }
 
-console.log(totalDistance);
-
-
     
     return(
         <section className="w-full h-full flex items-center">

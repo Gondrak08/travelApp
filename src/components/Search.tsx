@@ -331,7 +331,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                     onChange={(e)=>{ setSearchOrigin(e.target.value)  }}
                                     />
 
-                                    <div id="result" className='absolute bg-blue-300 w-full z-50' >
+                                    <div id="result" className='absolute bg-black w-full z-50' >
                                         {
                                             !userDest.cityOrigin && (
                                                 cities && cities.filter((item:[string], index:number)=>{
@@ -341,7 +341,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                                         return item[0]
                                                     }
                                                 }).map((item:[string], index:number)=>(
-                                                    <div onClick={(e)=> onSelect(e,item,'cityOrigin', index)} key={index} className='cursor-pointer hover:bg-black hover:bg-opacity-10 p-2'>
+                                                    <div onClick={(e)=> onSelect(e,item,'cityOrigin', index)} key={index} className='cursor-pointer bg-gray-300 border border-gray-500 hover:bg-black hover:text-white hover:bg-opacity-10 p-2'>
                                                         <span>{item[0]}</span>
                                                     </div>
                                                 ))
@@ -380,7 +380,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                         className={`${error&&errorType==='similarCity' ||  error&&errorType==='global'||error&&errorType==='cityDestination'||error&&errorType==='destinationSimilarToInterCity' ?'border-[1px] border-rose-500 ':''} border border-[1px] border-black w-full p-3`} 
                                         onChange={(e)=>{ setSearchDestin(e.target.value)  }}
                                         />
-                                        <div id="result" className='absolute bg-blue-300 w-full z-50' >
+                                        <div id="result" className='absolute bg-black w-full z-50' >
                                             {
                                                 !userDest.cityDestination && (
                                                     cities && cities.filter((item:[string], index:number)=>{
@@ -390,7 +390,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                                                             return item[0]
                                                         }
                                                     }).map((item:[string], index:number)=>(
-                                                        <div onClick={(e)=> onSelect(e,item,'cityDestination', index)} key={index} className='cursor-pointer hover:bg-black hover:bg-opacity-10 p-2'>
+                                                        <div onClick={(e)=> onSelect(e,item,'cityDestination', index)} key={index} className='cursor-pointer  bg-gray-300 border border-gray-500 hover:bg-black hover:text-white hover:bg-opacity-10 p-2'>
                                                             <span>{item[0]}</span>
                                                         </div>
                                                     ))
