@@ -206,8 +206,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
 
         if(error && errorType=='Dijon' && !calculateError){
             navigate("/")
-            console.log('hi')
-        }
+        };
         if(isReady){
             const params:any = {
                 originCity:userDest.cityOrigin,

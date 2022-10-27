@@ -220,10 +220,11 @@ if(isCalculating){
 
                     <div id="intermeDestinies" className={`${interDes?.length >= 1?'flex flex-col gap-3 w-full  pt-3 px-5':''}`} >
 
-                        <h3>intermediate cities</h3>
 
                         {
                             interDes?.length >= 1? (
+                                <>
+                                <h3>intermediate cities</h3>
                                 <div className='grid grid-cols-3 gap-3 w-full h-full' >
                                 
                                 {interDes.map((item:any, index:number)=>(
@@ -231,7 +232,8 @@ if(isCalculating){
                                     <input className='w-[fit-content] bg-gray-200 p-3' type="text" disabled value={item.city} />
                                     </>
                                 ))}
-                            </div>
+                                </div>
+                                </>
                             ) :null
                         }
                     </div>
