@@ -63,8 +63,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
         }
     },[userDest]);
     
-    
-    
+       
     function onSelect(e:any, item:any, keyName:string, index:number){
         setUserDest((state)=>{
             return{...state,[keyName]:item[0]}
@@ -505,7 +504,7 @@ const Search = ({userDest, setUserDest}:IProps) =>{
                 {
                     isCalculating || calculateError?(
                         <div className='w-full flex flex-col items-center'>
-                            <span className={`${calculateError? 'text-red-500' : ''}`} >Calculating routes...</span>
+                            <span className={`${calculateError? 'text-red-500' : 'text-blue-500'}`} >Calculating routes...</span>
                             <ClipLoader
                                 color={`${calculateError? 'red' : 'blue'}`}
                                 loading={calculateError}

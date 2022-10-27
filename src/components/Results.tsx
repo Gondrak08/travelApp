@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import DatePicker from "react-datepicker";
 import{DestinatioinType} from '../App'
 import haversine from 'haversine-distance';
+import ClipLoader from "react-spinners/ClipLoader";
 
 
 type DestinyProp = {
@@ -16,6 +17,7 @@ const Results =({state}:DestinyProp)=>{
     const [urlData, setUrlData] = useState<any>()
     const [isUrl, setIsUrl] = useState<boolean>(false);
     const [isCalculating ,setIsCalculataing] = useState<boolean>(false);
+    const [calculated, setCalculated] = useState<boolean>(false);
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
 
@@ -170,6 +172,12 @@ const Results =({state}:DestinyProp)=>{
         
 };
 
+if(isCalculating){
+    setTimeout(()=>{
+        setIsCalculataing(false);
+        setCalculated(true)
+    },1900)
+}
 
 console.log(totalDistance);
 
@@ -239,10 +247,27 @@ console.log(totalDistance);
                             <input className='w-[2em] bg-gray-200 px-2' type="text" disabled value={isUrl ? urlData.passenger : state.passengersNumber} />        
                         </div>
                         <div className='flex  items-center gap-2 justify-end w-full' >
-                            <label>
+                            <label className='text-inline'>
                                 Total distance:
                             </label>
-                            <span> { totalDistance } km </span>       
+                            {
+                                isCalculating ?( 
+                                <div className='w-full flex gap-3 items-center'>
+                                    <span className="text-blue-500" >Calculating routes...</span>
+                                    <ClipLoader
+                                        color='blue'
+                                        loading={isCalculating}
+                                        size={50}
+                                        aria-label="Loading Spinner"
+                                        data-testid="loader"
+                                    />
+                                </div>
+                            ):null
+                            }
+                            {
+                                calculated&&(<span> { totalDistance } km </span>)
+                            }
+                                   
                         </div>
                     </div>
                 </div>
